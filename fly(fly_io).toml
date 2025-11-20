@@ -1,0 +1,14 @@
+app = "canva-premium-access-bot"   # change if needed
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [services.concurrency]
+    type = "hoard"
+    hard_limit = 25
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    
