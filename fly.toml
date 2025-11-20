@@ -1,11 +1,11 @@
-app = "canva-premium-access-bot"   # change if needed
+app = "canva-premium-access-bot"
 
 [[services]]
   internal_port = 8080
   protocol = "tcp"
 
   [services.concurrency]
-    type = "hoard"
+    type = "connections"
     hard_limit = 25
 
   [[services.ports]]
