@@ -5,7 +5,7 @@ import logging
 import threading
 from datetime import datetime
 from flask import Flask, render_template_string, request, jsonify
-import telegram
+from telegram import Update
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Updater,
@@ -269,7 +269,7 @@ def webhook():
         update = request.get_json(force=True)
         updater = app.config["bot_updater"]
         dp = updater.dispatcher
-        dp.process_update(telegram.Update.de_json(update, app.config["bot_bot"]))
+        dp.process_update(Update.de_json(update, app.config["bot_bot"]))
         return "OK", 200
     return "Webhook OK", 200
 
