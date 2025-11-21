@@ -262,8 +262,14 @@ def user_page(user_id):
     )
 
 # Telegram webhook placeholder – prevents 404 on Telegram side
-@app.route("/webhook", methods=["POST", "GET"])
+@app.route("/webhook", methods=["POST"])
 def webhook():
+    if request.method == "POST":
+        update = request.get_json(force=True)
+        updater = app.config["bot_updater"]
+        dp = updater.dispatcher
+        dp.process_update(telegram.Update.de_json(update, app.config["bot_bot"]))
+        return "OK", 200
     return "Webhook OK", 200
 
 @app.route("/verify_ad/<int:user_id>/<int:count>", methods=["POST"])
