@@ -8,7 +8,6 @@ from flask import Flask, render_template_string, request, jsonify
 from telegram import Update
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ChatMemberHandler
-from telegram.constants import ChatMemberStatus
 from telegram.ext import (
     Updater,
     CommandHandler,
