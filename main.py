@@ -478,6 +478,36 @@ def echo_logger(update, context):
     logger.info("Msg from %s: %s", update.effective_user.id, (update.message.text or "")[:200])
     update.message.reply_text("✅ Received.")
 
+async def chat_member_update(update, context):
+    old = update.chat_member.old_chat_member
+    new = update.chat_member.new_chat_member
+
+    BOT_LINK = "https://t.me/CanvaPremiumAccessbot?startapp"
+
+    # When a new user joins the group
+    if old.status in [ChatMemberStatus.LEFT, ChatMemberStatus.KICKED] and \
+       new.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR]:
+
+        username = new.user.first_name
+
+        keyboard = [
+            [InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await update.effective_chat.send_message(
+            text=f"🎉 Welcome {username}!\n\nClick below to collect your Canva Premium Access 👇",
+            reply_markup=reply_markup
+        )
+
+    # When the BOT is added to a group
+    if new.user.id == context.bot.id and new.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR]:
+        await update.effective_chat.send_message(
+            "🔥 Thanks for adding me to this group!\n"
+            "I will welcome each new member with a Canva Premium Access gift. 🎁"
+        )
+
 # -------------------- RUNNERS --------------------
 def run_flask():
     port = int(os.environ.get("PORT", 5000))
