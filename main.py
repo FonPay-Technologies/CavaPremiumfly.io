@@ -21,9 +21,8 @@ ADMIN_IDS = set(int(x.strip()) for x in os.environ.get("ADMIN_IDS", "5236441213,
 PREMIUM_APPS_LINK = os.environ.get("PREMIUM_APPS_LINK", "https://t.me/gsf8mqOl0atkMTM0")
 CHEAP_DATA_LINK = os.environ.get("CHEAP_DATA_LINK", "https://play.google.com/store/apps/details?id=fonpaybusiness.aowd")
 # Monetag zone - set later via env or admin command
-MONETAG_ZONE = os.environ.get("MONETAG_ZONE") or ""
-MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}" if MONETAG_ZONE else ""
-
+MONETAG_ZONE = os.environ.get("MONETAG_ZONE") or "10136395"
+MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}"
 # Grace and inactivity settings
 GRACE_SECONDS = int(os.environ.get("GRACE_SECONDS", "60"))          # 1 minute grace after browser close
 INACTIVITY_MS = int(os.environ.get("INACTIVITY_MS", str(60*1000)))  # 1 minute inactivity (client)
@@ -481,12 +480,23 @@ def run_bot():
 
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 
-    logger.info("Starting Telegram polling...")
-    updater.start_polling()
-    updater.idle()
+    # --- Webhook Mode ---
+    url = os.environ.get("RENDER_EXTERNAL_URL")
+    if not url:
+        logger.error("ERROR: RENDER_EXTERNAL_URL is missing!")
+        return
 
-if __name__ == "__main__":
-    # run Flask in background thread and start bot
-    threading.Thread(target=run_flask, daemon=True).start()
-    run_bot()
+    webhook_url = f"{url}/webhook"
+    logger.info(f"Setting webhook to: {webhook_url}")
+
+    updater.bot.set_webhook(webhook_url)
+
+    # start receiving webhook updates
+    updater.start_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        url_path="/webhook"
+    )
+
+    updater.idle()
     
