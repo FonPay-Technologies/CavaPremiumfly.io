@@ -329,9 +329,25 @@ def start_cmd(update, context):
     uid = update.effective_user.id
     ad_count.setdefault(uid, 0)
     user_list.add(uid)
+
+    # Determine web URL
     web = os.environ.get("RENDER_EXTERNAL_URL") or os.environ.get("WEB_URL") or f"http://localhost:{os.environ.get('PORT',5000)}"
+
+    # Check for start parameter payload
+    payload = context.args[0] if context.args else ""
+    if payload.lower() == "startapp":
+        update.message.reply_text(
+            f"🎬 Welcome! Watch {get_required_ads()} ads to unlock your gift!",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Go to Ads", url=f"{web}/user/{uid}")]])
+        )
+        return
+
+    # Default /start behavior
     keyboard = [[InlineKeyboardButton("🎬 Start Watching Ads", url=f"{web}/user/{uid}")]]
-    update.message.reply_text(f"Welcome! Mode: {get_mode()}.\nWatch {get_required_ads()} ads to unlock your gift.", reply_markup=InlineKeyboardMarkup(keyboard))
+    update.message.reply_text(
+        f"Welcome! Mode: {get_mode()}.\nWatch {get_required_ads()} ads to unlock your gift.",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
 def help_cmd(update, context):
     text = (
