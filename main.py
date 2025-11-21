@@ -5,6 +5,7 @@ import logging
 import threading
 from datetime import datetime
 from flask import Flask, render_template_string, request, jsonify
+import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Updater,
