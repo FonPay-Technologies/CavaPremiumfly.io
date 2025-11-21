@@ -479,33 +479,37 @@ def echo_logger(update, context):
 
 def chat_member_update(update, context):
     try:
-        old = update.chat_member.old_chat_member
-        new = update.chat_member.new_chat_member
-
+        msg = update.message
         BOT_LINK = "https://t.me/CanvaPremiumAccessbot?startapp"
 
-        # USER JOINS GROUP
-        if old.status in ["left", "kicked"] and new.status in ["member", "administrator"]:
-            username = new.user.first_name
+        # Trigger when a NEW USER joins the group
+        if msg.new_chat_members:
+            for user in msg.new_chat_members:
+                # Ignore if bot itself is joining
+                if user.id == context.bot.id:
+                    msg.reply_text("🔥 Bot added! I will welcome new members.")
+                    continue
 
-            keyboard = [[InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+                keyboard = [[
+                    InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)
+                ]]
 
-            update.effective_chat.send_message(
-                text=f"🎉 Welcome {username}!\n\nClick below to claim your Canva Premium Access 👇",
-                reply_markup=reply_markup
-            )
+                msg.reply_text(
+                    f"🎉 Welcome {user.first_name}! Tap the button below to get Canva Premium Access 👇",
+                    reply_markup=InlineKeyboardMarkup(keyboard)
+                )
 
-        # BOT ADDED TO GROUP
-        if new.user.id == context.bot.id and new.status in ["member", "administrator"]:
-            update.effective_chat.send_message(
-                "🔥 Thanks for adding me here!\n"
-                "I will welcome new members with a Canva Premium gift button 🎁"
-            )
+        # Trigger when BOT is added to a group
+        if msg.new_chat_members:
+            for user in msg.new_chat_members:
+                if user.id == context.bot.id:
+                    msg.reply_text(
+                        "🔥 Thanks for adding me!\nI will welcome new members with a Canva Premium gift button 🎁."
+                    )
 
     except Exception as e:
-        print("chat_member_update error:", e)
-
+        print("Group join error:", e)
+        
 # -------------------- RUNNERS --------------------
 def run_flask():
     port = int(os.environ.get("PORT", 5000))
@@ -585,7 +589,7 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
 
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
-    dp.add_handler(ChatMemberHandler(chat_member_update, ChatMemberHandler.CHAT_MEMBER))
+    dp.add_handler(MessageHandler(Filters.status_update, chat_member_update))
 
     # Webhook URL from Render
     port = int(os.environ.get("PORT", 5000))
