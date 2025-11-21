@@ -506,3 +506,47 @@ def run_bot():
 
     updater.idle()
     
+# --------------------------------------------
+# FINAL STARTER (Required for Render)
+# --------------------------------------------
+if __name__ == "__main__":
+    from telegram import Bot
+    from telegram.utils.request import Request
+
+    bot = Bot(token=TOKEN, request=Request(con_pool_size=8))
+    updater = Updater(bot=bot, use_context=True)
+
+    # Save bot + updater for webhook processing
+    app.config["bot_bot"] = bot
+    app.config["bot_updater"] = updater
+
+    # Register all handlers again for webhook mode
+    dp = updater.dispatcher
+    dp.add_handler(CommandHandler("start", start_cmd))
+    dp.add_handler(CommandHandler("help", help_cmd))
+    dp.add_handler(CommandHandler("updategift", updategift_cmd))
+    dp.add_handler(CommandHandler("getgift", getgift_cmd))
+    dp.add_handler(CommandHandler("resetads", resetads_cmd))
+    dp.add_handler(CommandHandler("broadcast", broadcast_cmd))
+    dp.add_handler(CommandHandler("setmode", setmode_cmd))
+    dp.add_handler(CommandHandler("switchmode", switchmode_cmd))
+    dp.add_handler(CommandHandler("setpromo", setpromo_cmd))
+    dp.add_handler(CommandHandler("currentmode", currentmode_cmd))
+    dp.add_handler(CommandHandler("status", status_cmd))
+    dp.add_handler(CommandHandler("setads", setads_cmd))
+    dp.add_handler(CommandHandler("getads", getads_cmd))
+    dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
+
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+
+    # Webhook URL from Render
+    port = int(os.environ.get("PORT", 5000))
+    WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
+
+    bot.delete_webhook()
+    bot.set_webhook(url=f"{WEB_URL}/webhook")
+
+    print("🔥 Webhook set to:", f"{WEB_URL}/webhook")
+
+    # Start flask server
+    app.run(host="0.0.0.0", port=port)
