@@ -478,35 +478,34 @@ def echo_logger(update, context):
     logger.info("Msg from %s: %s", update.effective_user.id, (update.message.text or "")[:200])
     update.message.reply_text("✅ Received.")
 
-async def chat_member_update(update, context):
-    old = update.chat_member.old_chat_member
-    new = update.chat_member.new_chat_member
+def chat_member_update(update, context):
+    try:
+        old = update.chat_member.old_chat_member
+        new = update.chat_member.new_chat_member
 
-    BOT_LINK = "https://t.me/CanvaPremiumAccessbot?startapp"
+        BOT_LINK = "https://t.me/CanvaPremiumAccessbot?startapp"
 
-    # When a new user joins the group
-    if old.status in [ChatMemberStatus.LEFT, ChatMemberStatus.KICKED] and \
-       new.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR]:
+        # USER JOINS GROUP
+        if old.status in ["left", "kicked"] and new.status in ["member", "administrator"]:
+            username = new.user.first_name
 
-        username = new.user.first_name
+            keyboard = [[InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
 
-        keyboard = [
-            [InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]
-        ]
+            update.effective_chat.send_message(
+                text=f"🎉 Welcome {username}!\n\nClick below to claim your Canva Premium Access 👇",
+                reply_markup=reply_markup
+            )
 
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        # BOT ADDED TO GROUP
+        if new.user.id == context.bot.id and new.status in ["member", "administrator"]:
+            update.effective_chat.send_message(
+                "🔥 Thanks for adding me here!\n"
+                "I will welcome new members with a Canva Premium gift button 🎁"
+            )
 
-        await update.effective_chat.send_message(
-            text=f"🎉 Welcome {username}!\n\nClick below to collect your Canva Premium Access 👇",
-            reply_markup=reply_markup
-        )
-
-    # When the BOT is added to a group
-    if new.user.id == context.bot.id and new.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR]:
-        await update.effective_chat.send_message(
-            "🔥 Thanks for adding me to this group!\n"
-            "I will welcome each new member with a Canva Premium Access gift. 🎁"
-        )
+    except Exception as e:
+        print("chat_member_update error:", e)
 
 # -------------------- RUNNERS --------------------
 def run_flask():
