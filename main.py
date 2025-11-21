@@ -262,6 +262,11 @@ def user_page(user_id):
         inactivity_ms=INACTIVITY_MS
     )
 
+# Telegram webhook placeholder – prevents 404 on Telegram side
+@app.route("/webhook", methods=["POST", "GET"])
+def webhook():
+    return "Webhook OK", 200
+
 @app.route("/verify_ad/<int:user_id>/<int:count>", methods=["POST"])
 def verify_ad(user_id, count):
     prev = ad_count.get(user_id, 0)
