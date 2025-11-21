@@ -587,6 +587,7 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
 
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+    dp.add_handler(ChatMemberHandler(chat_member_update, ChatMemberHandler.CHAT_MEMBER))
 
     # Webhook URL from Render
     port = int(os.environ.get("PORT", 5000))
