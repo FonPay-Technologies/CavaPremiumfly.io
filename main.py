@@ -472,43 +472,75 @@ def set_monetag_zone_cmd(update, context):
     MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}"
     update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")
 
-# lightweight echo logger
+# lightweight echo logger — no longer replies, only logs
 def echo_logger(update, context):
-    logger.info("Msg from %s: %s", update.effective_user.id, (update.message.text or "")[:200])
-    update.message.reply_text("✅ Received.")
+    try:
+        user = getattr(update, "effective_user", None)
+        text = (getattr(update.message, "text", "") or "")[:200]
+        logger.info("Msg from %s: %s", getattr(user, "id", "unknown"), text)
+    except Exception:
+        logger.exception("echo_logger error")
+    # intentionally do NOT reply to every message
+
+
+# keep track of who we've welcomed to avoid duplicates: (chat_id, user_id)
+welcomed = set()
 
 def chat_member_update(update, context):
+    """
+    Handle new chat members (PTB v13 style). This function triggers when a
+    message with new_chat_members (status update) arrives. It will:
+     - ignore bots
+     - send welcome + Canva button once per user per chat
+    """
     try:
         msg = update.message
+        if not msg:
+            return  # nothing to do
+
+        new_members = getattr(msg, "new_chat_members", None)
+        if not new_members:
+            return
+
         BOT_LINK = "https://t.me/CanvaPremiumAccessbot?startapp"
+        chat_id = msg.chat.id
 
-        # Trigger when a NEW USER joins the group
-        if msg.new_chat_members:
-            for user in msg.new_chat_members:
-                # Ignore if bot itself is joining
+        for user in new_members:
+            # ignore other bots
+            if getattr(user, "is_bot", False):
+                # if it's the bot itself we can announce being added
                 if user.id == context.bot.id:
-                    msg.reply_text("🔥 Bot added! I will welcome new members.")
-                    continue
+                    try:
+                        msg.reply_text(
+                            "🔥 Thanks for adding me! I will welcome new members with a Canva Premium Access gift button 🎁"
+                        )
+                    except Exception:
+                        logger.exception("failed to announce bot added")
+                continue
 
-                keyboard = [[
-                    InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)
-                ]]
+            key = (chat_id, user.id)
+            if key in welcomed:
+                # already welcomed this user in this chat — skip
+                continue
 
-                msg.reply_text(
-                    f"🎉 Welcome {user.first_name}! Tap the button below to get Canva Premium Access 👇",
-                    reply_markup=InlineKeyboardMarkup(keyboard)
+            # mark as welcomed
+            welcomed.add(key)
+
+            # send welcome message with inline button
+            try:
+                keyboard = InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]]
                 )
 
-        # Trigger when BOT is added to a group
-        if msg.new_chat_members:
-            for user in msg.new_chat_members:
-                if user.id == context.bot.id:
-                    msg.reply_text(
-                        "🔥 Thanks for adding me!\nI will welcome new members with a Canva Premium gift button 🎁."
-                    )
+                msg.reply_text(
+                    f"🎉 Welcome {user.first_name}!\nTap below to claim your Canva Premium Access 👇",
+                    reply_markup=keyboard
+                )
+            except Exception:
+                logger.exception("failed to send welcome message to %s in chat %s", user.id, chat_id)
 
-    except Exception as e:
-        print("Group join error:", e)
+    except Exception:
+        logger.exception("chat_member_update error")
         
 # -------------------- RUNNERS --------------------
 def run_flask():
