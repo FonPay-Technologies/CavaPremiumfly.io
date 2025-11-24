@@ -541,7 +541,10 @@ def chat_member_update(update, context):
 
     except Exception:
         logger.exception("chat_member_update error")
-        
+
+def chat_member_update(update, context):
+    print("🔥 RAW JOIN EVENT:", update.to_dict())
+
 # -------------------- RUNNERS --------------------
 def run_flask():
     port = int(os.environ.get("PORT", 5000))
