@@ -558,52 +558,6 @@ def handle_join_events(update, context):
 
         return
 
-# -------------------- RUNNERS --------------------
-def run_flask():
-    port = int(os.environ.get("PORT", 5000))
-    logger.info("Starting Flask on port %s", port)
-    app.run(host="0.0.0.0", port=port)
-
-def run_bot():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
-
-    dp.add_handler(CommandHandler("start", start_cmd))
-    dp.add_handler(CommandHandler("help", help_cmd))
-    dp.add_handler(CommandHandler("updategift", updategift_cmd))
-    dp.add_handler(CommandHandler("getgift", getgift_cmd))
-    dp.add_handler(CommandHandler("resetads", resetads_cmd))
-    dp.add_handler(CommandHandler("broadcast", broadcast_cmd))
-    dp.add_handler(CommandHandler("setmode", setmode_cmd))
-    dp.add_handler(CommandHandler("switchmode", switchmode_cmd))
-    dp.add_handler(CommandHandler("setpromo", setpromo_cmd))
-    dp.add_handler(CommandHandler("currentmode", currentmode_cmd))
-    dp.add_handler(CommandHandler("status", status_cmd))
-    dp.add_handler(CommandHandler("setads", setads_cmd))
-    dp.add_handler(CommandHandler("getads", getads_cmd))
-    dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
-
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
-
-    # --- Webhook Mode ---
-    url = os.environ.get("RENDER_EXTERNAL_URL")
-    if not url:
-        logger.error("ERROR: RENDER_EXTERNAL_URL is missing!")
-        return
-
-    webhook_url = f"{url}/webhook"
-    logger.info(f"Setting webhook to: {webhook_url}")
-
-    updater.bot.set_webhook(webhook_url)
-
-    # start receiving webhook updates
-    updater.start_webhook(
-        listen="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)),
-        url_path="/webhook"
-    )
-
-    updater.idle()
     
 # --------------------------------------------
 # FINAL STARTER (Required for Render)
@@ -614,15 +568,11 @@ if __name__ == "__main__":
 
     bot = Bot(token=TOKEN, request=Request(con_pool_size=8))
     updater = Updater(bot=bot, use_context=True)
-
-    # Save bot + updater for webhook processing
-    app.config["bot_bot"] = bot
-    app.config["bot_updater"] = updater
-
-    # Register all handlers again for webhook mode
     dp = updater.dispatcher
 
-    dp.add_handler(MessageHandler(Filters.status_update, chat_member_update), group=0)
+    # -------------------------
+    # Register ALL bot commands
+    # -------------------------
     dp.add_handler(CommandHandler("start", start_cmd))
     dp.add_handler(CommandHandler("help", help_cmd))
     dp.add_handler(CommandHandler("updategift", updategift_cmd))
@@ -637,10 +587,35 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("setads", setads_cmd))
     dp.add_handler(CommandHandler("getads", getads_cmd))
     dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+
+    # ------------------------------
+    # Register your JOIN EVENT handler
+    # ------------------------------
     dp.add_handler(MessageHandler(Filters.status_update, handle_join_events), group=0)
     dp.add_handler(MessageHandler(Filters.chat_member, handle_join_events), group=0)
-    dp.add_handler(MessageHandler(Filters.update.channel_post, handle_join_events), group=0)
+    dp.add_handler(MessageHandler(Filters.channel_post, handle_join_events), group=0)
+
+    # ------------------------------
+    # Logger for text messages
+    # ------------------------------
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+
+    # ------------------------------
+    # Webhook configuration
+    # ------------------------------
+    app.config["bot_bot"] = bot
+    app.config["bot_updater"] = updater
+
+    webhook_url = f"{os.environ.get('RENDER_EXTERNAL_URL')}/webhook"
+    bot.set_webhook(webhook_url)
+
+    updater.start_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        url_path="/webhook",
+    )
+
+    updater.idle()
 
     # Webhook URL from Render
     port = int(os.environ.get("PORT", 5000))
