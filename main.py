@@ -638,6 +638,9 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("getads", getads_cmd))
     dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+    dp.add_handler(MessageHandler(Filters.status_update, handle_join_events), group=0)
+    dp.add_handler(MessageHandler(Filters.chat_member, handle_join_events), group=0)
+    dp.add_handler(MessageHandler(Filters.update.channel_post, handle_join_events), group=0)
 
     # Webhook URL from Render
     port = int(os.environ.get("PORT", 5000))
