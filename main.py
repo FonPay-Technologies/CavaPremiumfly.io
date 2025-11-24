@@ -4,47 +4,6 @@ import time
 import logging
 import threading
 from datetime import datetime
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext, MessageHandler, Filters
-
-WELCOME_BUTTON = InlineKeyboardMarkup([
-    [InlineKeyboardButton("🎁 Get Canva Premium Access", url="https://startapp.link/your-link-here")]
-])
-
-def handle_new_member(update: Update, context: CallbackContext):
-    try:
-        message = update.message
-
-        # Safety check
-        if not message:
-            return
-
-        # Handle: new chat members (group joins or added manually)
-        if message.new_chat_members:
-            for member in message.new_chat_members:
-                # Ignore bot itself
-                if member.is_bot:
-                    return
-
-                welcome_text = f"""
-👋 Welcome *{member.full_name}*!
-
-🎁 Claim your *Canva Premium Access* below:
-"""
-                message.reply_text(
-                    welcome_text,
-                    reply_markup=WELCOME_BUTTON,
-                    parse_mode="Markdown"
-                )
-            return
-
-        # Handle: left chat member (ignore)
-        if message.left_chat_member:
-            return
-
-    except Exception as e:
-        print(f"Join Handler Error: {e}")
-
 
 # -------------------- CONFIG --------------------
 # You provided these values
@@ -513,68 +472,84 @@ def echo_logger(update, context):
         logger.exception("echo_logger error")
     # intentionally do NOT reply to every message
 
+# ======================================================
+# UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
+# ======================================================
 
-# keep track of who we've welcomed to avoid duplicates: (chat_id, user_id)
+from telegram import ChatMemberUpdated
+
 welcomed = set()
 
-def chat_member_update(update, context):
+def handle_join_events(update, context):
+    """Handles ALL join events:
+       - group joins
+       - channel joins
+       - user added manually
+       - user joins via link
+       - bot added to group/channel
+       - admin promoted/demoted
     """
-    Handle new chat members (PTB v13 style). This function triggers when a
-    message with new_chat_members (status update) arrives. It will:
-     - ignore bots
-     - send welcome + Canva button once per user per chat
-    """
-    try:
-        msg = update.message
-        if not msg:
-            return  # nothing to do
 
-        new_members = getattr(msg, "new_chat_members", None)
-        if not new_members:
-            return
+    upd = update.to_dict()
+    print("\n🔥 RAW JOIN EVENT:", upd, "\n")
 
-        BOT_LINK = "https://t.me/CanvaPremiumAccessbot?startapp"
-        chat_id = msg.chat.id
+    msg = update.message
+    chat = update.effective_chat
+    bot_id = context.bot.id
 
-        for user in new_members:
-            # ignore other bots
-            if getattr(user, "is_bot", False):
-                # if it's the bot itself we can announce being added
-                if user.id == context.bot.id:
-                    try:
-                        msg.reply_text(
-                            "🔥 Thanks for adding me! I will welcome new members with a Canva Premium Access gift button 🎁"
-                        )
-                    except Exception:
-                        logger.exception("failed to announce bot added")
-                continue
+    # 1️⃣ GROUP JOIN EVENTS (new_chat_members)
+    if msg and msg.new_chat_members:
+        for user in msg.new_chat_members:
 
-            key = (chat_id, user.id)
+            # Bot added
+            if user.id == bot_id:
+                try:
+                    msg.reply_text(
+                        "🔥 Thanks for adding me!\n"
+                        "I will welcome new members with a Canva Premium button 🎁"
+                    )
+                except: pass
+                return
+
+            # Ignore other bots
+            if user.is_bot:
+                return
+
+            # Unique welcome check
+            key = (chat.id, user.id)
             if key in welcomed:
-                # already welcomed this user in this chat — skip
-                continue
-
-            # mark as welcomed
+                return
             welcomed.add(key)
 
-            # send welcome message with inline button
+            BOT_LINK = "https://t.me/CanvaPremiumAccessbot?startapp"
+            keyboard = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]]
+            )
+
+            msg.reply_text(
+                f"🎉 Welcome {user.first_name}!\nTap below to claim Canva Premium Access 👇",
+                reply_markup=keyboard
+            )
+        return
+
+    # 2️⃣ CHANNEL JOIN EVENTS
+    if isinstance(update.my_chat_member, ChatMemberUpdated):
+        c = update.my_chat_member
+
+        old = c.old_chat_member.status
+        new = c.new_chat_member.status
+
+        # Bot added to CHANNEL
+        if new in ["member", "administrator"] and c.new_chat_member.user.id == bot_id:
             try:
-                keyboard = InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]]
+                context.bot.send_message(
+                    chat_id=chat.id,
+                    text="🔥 Bot added to channel! I will send join-welcome messages."
                 )
+            except: pass
+            return
 
-                msg.reply_text(
-                    f"🎉 Welcome {user.first_name}!\nTap below to claim your Canva Premium Access 👇",
-                    reply_markup=keyboard
-                )
-            except Exception:
-                logger.exception("failed to send welcome message to %s in chat %s", user.id, chat_id)
-
-    except Exception:
-        logger.exception("chat_member_update error")
-
-def chat_member_update(update, context):
-    print("🔥 RAW JOIN EVENT:", update.to_dict())
+        return
 
 # -------------------- RUNNERS --------------------
 def run_flask():
