@@ -4,16 +4,47 @@ import time
 import logging
 import threading
 from datetime import datetime
-from flask import Flask, render_template_string, request, jsonify
-from telegram import Update
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import MessageHandler, Filters
-from telegram.ext import (
-    Updater,
-    CommandHandler,
-    MessageHandler,
-    Filters
-)
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext, MessageHandler, Filters
+
+WELCOME_BUTTON = InlineKeyboardMarkup([
+    [InlineKeyboardButton("🎁 Get Canva Premium Access", url="https://startapp.link/your-link-here")]
+])
+
+def handle_new_member(update: Update, context: CallbackContext):
+    try:
+        message = update.message
+
+        # Safety check
+        if not message:
+            return
+
+        # Handle: new chat members (group joins or added manually)
+        if message.new_chat_members:
+            for member in message.new_chat_members:
+                # Ignore bot itself
+                if member.is_bot:
+                    return
+
+                welcome_text = f"""
+👋 Welcome *{member.full_name}*!
+
+🎁 Claim your *Canva Premium Access* below:
+"""
+                message.reply_text(
+                    welcome_text,
+                    reply_markup=WELCOME_BUTTON,
+                    parse_mode="Markdown"
+                )
+            return
+
+        # Handle: left chat member (ignore)
+        if message.left_chat_member:
+            return
+
+    except Exception as e:
+        print(f"Join Handler Error: {e}")
+
 
 # -------------------- CONFIG --------------------
 # You provided these values
