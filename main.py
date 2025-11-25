@@ -570,35 +570,30 @@ if __name__ == "__main__":
     updater = Updater(bot=bot, use_context=True)
     dp = updater.dispatcher
 
-    # -------------------------
-    # Register ALL bot commands
-    # -------------------------
-    dp.add_handler(CommandHandler("start", start_cmd))
-    dp.add_handler(CommandHandler("help", help_cmd))
-    dp.add_handler(CommandHandler("updategift", updategift_cmd))
-    dp.add_handler(CommandHandler("getgift", getgift_cmd))
-    dp.add_handler(CommandHandler("resetads", resetads_cmd))
-    dp.add_handler(CommandHandler("broadcast", broadcast_cmd))
-    dp.add_handler(CommandHandler("setmode", setmode_cmd))
-    dp.add_handler(CommandHandler("switchmode", switchmode_cmd))
-    dp.add_handler(CommandHandler("setpromo", setpromo_cmd))
-    dp.add_handler(CommandHandler("currentmode", currentmode_cmd))
-    dp.add_handler(CommandHandler("status", status_cmd))
-    dp.add_handler(CommandHandler("setads", setads_cmd))
-    dp.add_handler(CommandHandler("getads", getads_cmd))
-    dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
+    # -------------------- HANDLER REGISTRATION (PTB 13) --------------------
+dp = updater.dispatcher
 
-    # ------------------------------
-    # Register your JOIN EVENT handler
-    # ------------------------------
-    dp.add_handler(MessageHandler(Filters.status_update, handle_join_events), group=0)
-    dp.add_handler(MessageHandler(Filters.chat_member, handle_join_events), group=0)
-    dp.add_handler(MessageHandler(Filters.channel_post, handle_join_events), group=0)
+# Universal Join Handler
+dp.add_handler(MessageHandler(Filters.status_update, handle_join_events), group=0)
 
-    # ------------------------------
-    # Logger for text messages
-    # ------------------------------
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+# Commands
+dp.add_handler(CommandHandler("start", start_cmd))
+dp.add_handler(CommandHandler("help", help_cmd))
+dp.add_handler(CommandHandler("updategift", updategift_cmd))
+dp.add_handler(CommandHandler("getgift", getgift_cmd))
+dp.add_handler(CommandHandler("resetads", resetads_cmd))
+dp.add_handler(CommandHandler("broadcast", broadcast_cmd))
+dp.add_handler(CommandHandler("setmode", setmode_cmd))
+dp.add_handler(CommandHandler("switchmode", switchmode_cmd))
+dp.add_handler(CommandHandler("setpromo", setpromo_cmd))
+dp.add_handler(CommandHandler("currentmode", currentmode_cmd))
+dp.add_handler(CommandHandler("status", status_cmd))
+dp.add_handler(CommandHandler("setads", setads_cmd))
+dp.add_handler(CommandHandler("getads", getads_cmd))
+dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
+
+# Logger for text messages (optional)
+dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 
     # ------------------------------
     # Webhook configuration
