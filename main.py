@@ -595,11 +595,11 @@ dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
 # Logger for text messages (optional)
 dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 
-    # ------------------------------
-    # Webhook configuration
-    # ------------------------------
-    app.config["bot_bot"] = bot
-    app.config["bot_updater"] = updater
+# ------------------------------
+# Webhook configuration
+# ------------------------------
+app.config["bot_bot"] = bot
+app.config["bot_updater"] = updater
 
     webhook_url = f"{os.environ.get('RENDER_EXTERNAL_URL')}/webhook"
     bot.set_webhook(webhook_url)
