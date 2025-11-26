@@ -601,16 +601,16 @@ dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 app.config["bot_bot"] = bot
 app.config["bot_updater"] = updater
 
-    webhook_url = f"{os.environ.get('RENDER_EXTERNAL_URL')}/webhook"
-    bot.set_webhook(webhook_url)
+webhook_url = f"{os.environ.get('RENDER_EXTERNAL_URL')}/webhook"
+bot.set_webhook(webhook_url)
 
-    updater.start_webhook(
-        listen="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)),
-        url_path="/webhook",
-    )
+updater.start_webhook(
+    listen="0.0.0.0",
+    port=int(os.environ.get("PORT", 5000)),
+    url_path="/webhook",
+)
 
-    updater.idle()
+updater.idle()
 
     # Webhook URL from Render
     port = int(os.environ.get("PORT", 5000))
