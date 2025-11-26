@@ -612,14 +612,16 @@ updater.start_webhook(
 
 updater.idle()
 
-    # Webhook URL from Render
-    port = int(os.environ.get("PORT", 5000))
-    WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
+# -----------------------------------
+# Render Webhook (Final Start Section)
+# -----------------------------------
+port = int(os.environ.get("PORT", 5000))
+WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
 
-    bot.delete_webhook()
-    bot.set_webhook(url=f"{WEB_URL}/webhook")
+bot.delete_webhook()
+bot.set_webhook(url=f"{WEB_URL}/webhook")
 
-    print("🔥 Webhook set to:", f"{WEB_URL}/webhook")
+print("🔥 Webhook set to:", f"{WEB_URL}/webhook")
 
-    # Start flask server
-    app.run(host="0.0.0.0", port=port)
+# Start flask server
+app.run(host="0.0.0.0", port=port)
