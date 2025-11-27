@@ -598,9 +598,6 @@ dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 # ------------------------------
 # Webhook configuration (Render)
 # ------------------------------
-import telegram
-from flask import Flask, request
-from telegram.ext import Updater
 
 TOKEN = "8363904269:AAEdTCPSPzq9qAFOT9gfl-_ZM5ZUWJGDQGk"
 
