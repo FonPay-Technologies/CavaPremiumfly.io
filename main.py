@@ -602,7 +602,7 @@ import telegram
 from flask import Flask, request
 from telegram.ext import Updater
 
-TOKEN = "your_token_here"
+TOKEN = "8363904269:AAEdTCPSPzq9qAFOT9gfl-_ZM5ZUWJGDQGk"
 
 # 1️⃣ Create Flask app
 app = Flask(__name__)
