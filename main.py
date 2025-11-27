@@ -594,6 +594,10 @@ dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
 
 # Logger for text messages (optional)
 dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+from telegram.ext import ChatMemberHandler
+
+dp.add_handler(ChatMemberHandler(handle_join_events, ChatMemberHandler.CHAT_MEMBER))
+dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_join_events))
 
 # ------------------------------
 # Webhook configuration (Render)
