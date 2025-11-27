@@ -570,13 +570,7 @@ if __name__ == "__main__":
     updater = Updater(bot=bot, use_context=True)
     dp = updater.dispatcher
 
-    # -------------------- HANDLER REGISTRATION (PTB 13) --------------------
-dp = updater.dispatcher
-
-# Universal Join Handler
-dp.add_handler(MessageHandler(Filters.status_update, handle_join_events), group=0)
-
-# Commands
+    # -------------------- HANDLER REGISTRATION --------------------
 dp.add_handler(CommandHandler("start", start_cmd))
 dp.add_handler(CommandHandler("help", help_cmd))
 dp.add_handler(CommandHandler("updategift", updategift_cmd))
@@ -592,12 +586,13 @@ dp.add_handler(CommandHandler("setads", setads_cmd))
 dp.add_handler(CommandHandler("getads", getads_cmd))
 dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
 
-# Logger for text messages (optional)
-dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+# 🔥 JOIN DETECTION HANDLERS (VERY IMPORTANT)
 from telegram.ext import ChatMemberHandler
-
 dp.add_handler(ChatMemberHandler(handle_join_events, ChatMemberHandler.CHAT_MEMBER))
 dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_join_events))
+
+# Log all other messages without replying
+dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 
 # ------------------------------
 # Webhook configuration (Render)
