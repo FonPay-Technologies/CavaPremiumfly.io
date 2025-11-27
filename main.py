@@ -598,9 +598,35 @@ dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 # ------------------------------
 # Webhook configuration (Render)
 # ------------------------------
+import telegram
+from flask import Flask, request
+from telegram.ext import Updater
+
+TOKEN = "your_token_here"
+
+# 1️⃣ Create Flask app
+app = Flask(__name__)
+
+# 2️⃣ Initialize bot + updater
+bot = telegram.Bot(token=TOKEN)
+updater = Updater(token=TOKEN, use_context=True)
+
+# 3️⃣ ADD WEBHOOK ROUTE HERE (very important)
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    bot = app.config["bot_bot"]
+    updater = app.config["bot_updater"]
+
+    update = telegram.Update.de_json(request.get_json(force=True), bot)
+    updater.dispatcher.process_update(update)
+
+    return "ok", 200
+
+# 4️⃣ Configure bot + updater inside Flask app
 app.config["bot_bot"] = bot
 app.config["bot_updater"] = updater
 
+# 5️⃣ Set webhook (Render)
 WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
 webhook_url = f"{WEB_URL}/webhook"
 
@@ -609,6 +635,6 @@ bot.set_webhook(url=webhook_url)
 
 print("🔥 Webhook set to:", webhook_url)
 
-# Start Flask server (Render requires this)
+# 6️⃣ Start Flask server (Render WILL call this)
 port = int(os.environ.get("PORT", 5000))
 app.run(host="0.0.0.0", port=port)
