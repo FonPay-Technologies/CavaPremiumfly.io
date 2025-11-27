@@ -599,8 +599,6 @@ dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 # Webhook configuration (Render)
 # ------------------------------
 
-TOKEN = "8363904269:AAEdTCPSPzq9qAFOT9gfl-_ZM5ZUWJGDQGk"
-
 # 1️⃣ Create Flask app
 app = Flask(__name__)
 
