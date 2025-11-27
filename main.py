@@ -596,32 +596,19 @@ dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
 dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 
 # ------------------------------
-# Webhook configuration
+# Webhook configuration (Render)
 # ------------------------------
 app.config["bot_bot"] = bot
 app.config["bot_updater"] = updater
 
-webhook_url = f"{os.environ.get('RENDER_EXTERNAL_URL')}/webhook"
-bot.set_webhook(webhook_url)
-
-updater.start_webhook(
-    listen="0.0.0.0",
-    port=int(os.environ.get("PORT", 5000)),
-    url_path="/webhook",
-)
-
-updater.idle()
-
-# -----------------------------------
-# Render Webhook (Final Start Section)
-# -----------------------------------
-port = int(os.environ.get("PORT", 5000))
 WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
+webhook_url = f"{WEB_URL}/webhook"
 
 bot.delete_webhook()
-bot.set_webhook(url=f"{WEB_URL}/webhook")
+bot.set_webhook(url=webhook_url)
 
-print("🔥 Webhook set to:", f"{WEB_URL}/webhook")
+print("🔥 Webhook set to:", webhook_url)
 
-# Start flask server
+# Start Flask server (Render requires this)
+port = int(os.environ.get("PORT", 5000))
 app.run(host="0.0.0.0", port=port)
