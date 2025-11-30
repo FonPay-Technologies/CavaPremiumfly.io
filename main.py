@@ -4,12 +4,14 @@ import time
 import logging
 from datetime import datetime
 from flask import Flask, render_template_string, request, jsonify
+import telegram  # <<< REQUIRED
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
-Updater,
-CommandHandler,
-MessageHandler,
-Filters
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    ChatMemberHandler  # If you use join detection
 )
 
 # -------------------- CONFIG --------------------
