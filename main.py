@@ -560,77 +560,73 @@ def handle_join_events(update, context):
 
         return
 
-    
-# --------------------------------------------
+   # --------------------------------------------
 # FINAL STARTER (Required for Render)
 # --------------------------------------------
 if __name__ == "__main__":
     from telegram import Bot
     from telegram.utils.request import Request
 
+    # 1) single Bot + Updater (reuse these everywhere)
     bot = Bot(token=TOKEN, request=Request(con_pool_size=8))
     updater = Updater(bot=bot, use_context=True)
     dp = updater.dispatcher
 
     # -------------------- HANDLER REGISTRATION --------------------
-dp.add_handler(CommandHandler("start", start_cmd))
-dp.add_handler(CommandHandler("help", help_cmd))
-dp.add_handler(CommandHandler("updategift", updategift_cmd))
-dp.add_handler(CommandHandler("getgift", getgift_cmd))
-dp.add_handler(CommandHandler("resetads", resetads_cmd))
-dp.add_handler(CommandHandler("broadcast", broadcast_cmd))
-dp.add_handler(CommandHandler("setmode", setmode_cmd))
-dp.add_handler(CommandHandler("switchmode", switchmode_cmd))
-dp.add_handler(CommandHandler("setpromo", setpromo_cmd))
-dp.add_handler(CommandHandler("currentmode", currentmode_cmd))
-dp.add_handler(CommandHandler("status", status_cmd))
-dp.add_handler(CommandHandler("setads", setads_cmd))
-dp.add_handler(CommandHandler("getads", getads_cmd))
-dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
+    # Commands
+    dp.add_handler(CommandHandler("start", start_cmd))
+    dp.add_handler(CommandHandler("help", help_cmd))
+    dp.add_handler(CommandHandler("updategift", updategift_cmd))
+    dp.add_handler(CommandHandler("getgift", getgift_cmd))
+    dp.add_handler(CommandHandler("resetads", resetads_cmd))
+    dp.add_handler(CommandHandler("broadcast", broadcast_cmd))
+    dp.add_handler(CommandHandler("setmode", setmode_cmd))
+    dp.add_handler(CommandHandler("switchmode", switchmode_cmd))
+    dp.add_handler(CommandHandler("setpromo", setpromo_cmd))
+    dp.add_handler(CommandHandler("currentmode", currentmode_cmd))
+    dp.add_handler(CommandHandler("status", status_cmd))
+    dp.add_handler(CommandHandler("setads", setads_cmd))
+    dp.add_handler(CommandHandler("getads", getads_cmd))
+    dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
 
-# 🔥 JOIN DETECTION HANDLERS (VERY IMPORTANT)
-from telegram.ext import ChatMemberHandler
-dp.add_handler(ChatMemberHandler(handle_join_events, ChatMemberHandler.CHAT_MEMBER))
-dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_join_events))
+    # Join detection: ChatMemberHandler (PTB v13) + new_chat_members fallback
+    try:
+        from telegram.ext import ChatMemberHandler
+        dp.add_handler(ChatMemberHandler(handle_join_events, ChatMemberHandler.CHAT_MEMBER), group=0)
+    except Exception:
+        # If ChatMemberHandler import fails for any reason, skip — we still have the new_chat_members handler below
+        logger.info("ChatMemberHandler not available; relying on message new_chat_members handler.")
 
-# Log all other messages without replying
-dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+    # new_chat_members (older style) -> fallback / complementary
+    dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_join_events), group=0)
 
-# ------------------------------
-# Webhook configuration (Render)
-# ------------------------------
+    # Log text messages (no reply)
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
 
-# 1️⃣ Create Flask app
-app = Flask(__name__)
+    # ------------------------------
+    # Webhook configuration for Render
+    # ------------------------------
+    # Expose bot + updater to the Flask webhook route already defined above
+    app.config["bot_bot"] = bot
+    app.config["bot_updater"] = updater
 
-# 2️⃣ Initialize bot + updater
-bot = telegram.Bot(token=TOKEN)
-updater = Updater(token=TOKEN, use_context=True)
+    # Build webhook URL from environment (Render provides HTTPS domain)
+    WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
+    if not WEB_URL:
+        logger.error("RENDER_EXTERNAL_URL is not set. Webhook won't be configured.")
+    else:
+        webhook_url = f"{WEB_URL.rstrip('/')}/webhook"
+        try:
+            # Remove any previously set webhook and set the new one
+            bot.delete_webhook()
+            bot.set_webhook(url=webhook_url)
+            logger.info("✅ Webhook set to: %s", webhook_url)
+        except Exception as e:
+            logger.exception("Failed to set webhook: %s", e)
 
-# 3️⃣ ADD WEBHOOK ROUTE HERE (very important)
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    bot = app.config["bot_bot"]
-    updater = app.config["bot_updater"]
-
-    update = telegram.Update.de_json(request.get_json(force=True), bot)
-    updater.dispatcher.process_update(update)
-
-    return "ok", 200
-
-# 4️⃣ Configure bot + updater inside Flask app
-app.config["bot_bot"] = bot
-app.config["bot_updater"] = updater
-
-# 5️⃣ Set webhook (Render)
-WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
-webhook_url = f"{WEB_URL}/webhook"
-
-bot.delete_webhook()
-bot.set_webhook(url=webhook_url)
-
-print("🔥 Webhook set to:", webhook_url)
-
-# 6️⃣ Start Flask server (Render WILL call this)
-port = int(os.environ.get("PORT", 5000))
-app.run(host="0.0.0.0", port=port)
+    # Note: we DON'T call updater.start_webhook() here because the Flask route
+    # will receive and dispatch incoming updates (updater.dispatcher.process_update).
+    # Start the Flask app (Render will bind to the PORT)
+    port = int(os.environ.get("PORT", 5000))
+    logger.info("Starting Flask (and webhook receiver) on port %s", port)
+    app.run(host="0.0.0.0", port=port)
