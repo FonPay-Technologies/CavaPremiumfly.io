@@ -16,7 +16,7 @@ from telegram.ext import (
 
 # -------------------- CONFIG --------------------
 # You provided these values
-TOKEN = os.environ.get("TOKEN") or "8363904269:AAEdTCPSPzq9qAFOT9gfl-_ZM5ZUWJGDQGk"
+TOKEN = os.environ.get("TOKEN") or "8325305060:AAGYUavCLlErFfGs-CXBiZT5YaMZaEKSCvI"
 # Admin IDs (multiple allowed)
 ADMIN_IDS = set(int(x.strip()) for x in os.environ.get("ADMIN_IDS", "5236441213,5725566044").split(","))
 PREMIUM_APPS_LINK = os.environ.get("PREMIUM_APPS_LINK", "https://t.me/gsf8mqOl0atkMTM0")
