@@ -673,6 +673,14 @@ if __name__ == "__main__":
         # If ChatMemberHandler import fails for any reason, skip — we still have the new_chat_members handler below
         logger.info("ChatMemberHandler not available; relying on message new_chat_members handler.")
 
+    dp.add_handler(
+    MessageHandler(
+        Filters.text & ~Filters.command,
+        moderate_links_and_mentions
+    ),
+    group=0
+)
+
     # new_chat_members (older style) -> fallback / complementary
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_join_events), group=0)
 
