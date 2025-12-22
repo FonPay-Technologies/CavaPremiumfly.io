@@ -483,6 +483,80 @@ def echo_logger(update, context):
         logger.exception("echo_logger error")
     # intentionally do NOT reply to every message
 
+ALLOWED_MENTIONS = {"@ejimurphy"}
+
+LINK_REGEX = re.compile(
+    r"(https?://|www\.|t\.me/)",
+    re.IGNORECASE
+)
+
+MENTION_REGEX = re.compile(r"@\w+")
+
+
+def moderate_links_and_mentions(update, context):
+    message = update.effective_message
+    chat = update.effective_chat
+    user = update.effective_user
+
+    # Safety checks
+    if not message or not message.text:
+        return
+
+    # Only moderate GROUPS
+    if chat.type not in ("group", "supergroup"):
+        return
+
+    # Ignore admins
+    try:
+        member = chat.get_member(user.id)
+        if member.status in ("administrator", "creator"):
+            return
+    except Exception:
+        pass
+
+    text = message.text.lower()
+
+    # Detect links
+    has_link = bool(LINK_REGEX.search(text))
+
+    # Detect mentions
+    mentions = set(MENTION_REGEX.findall(text))
+    illegal_mentions = {
+        m for m in mentions if m.lower() not in ALLOWED_MENTIONS
+    }
+
+    if has_link or illegal_mentions:
+        try:
+            # Delete message
+            message.delete()
+
+            # Ban user
+            context.bot.ban_chat_member(
+                chat_id=chat.id,
+                user_id=user.id
+            )
+
+            # Optional log message (auto-deletes)
+            warn = context.bot.send_message(
+                chat_id=chat.id,
+                text=(
+                    f"🚫 {user.first_name} was banned.\n"
+                    "Reason: Posting links or tagging users."
+                )
+            )
+
+            # Auto-delete warning after 5 seconds
+            context.bot.delete_message(
+                chat_id=chat.id,
+                message_id=warn.message_id,
+                timeout=5
+            )
+
+        except BadRequest as e:
+            logger.warning("Moderation failed: %s", e)
+
+        return
+
 # ======================================================
 # UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
 # ======================================================
