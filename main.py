@@ -780,6 +780,10 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
     dp.add_handler(CommandHandler("warned", warned_list))
     dp.add_handler(CommandHandler("banned", banned_list))
+    dispatcher.add_handler(CommandHandler("unwarn", unwarn))
+    dispatcher.add_handler(CommandHandler("unban", unban))
+    dispatcher.add_handler(CommandHandler("mod_on", mod_on))
+    dispatcher.add_handler(CommandHandler("mod_off", mod_off))
 
     # Join detection: ChatMemberHandler (PTB v13) + new_chat_members fallback
     try:
