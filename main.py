@@ -525,6 +525,13 @@ def handle_violation(update, context, reason):
             text=f"⛔ {user.first_name} has been banned.\nReason: Repeated violations."
         )
 
+def is_group_admin(bot, chat_id, user_id):
+    try:
+        admins = bot.get_chat_administrators(chat_id)
+        return any(admin.user.id == user_id for admin in admins)
+    except:
+        return False
+        
 # lightweight echo logger — no longer replies, only logs
 def echo_logger(update, context):
     try:
@@ -542,9 +549,9 @@ def moderation_handler(update, context):
     if not msg or not user:
         return
 
-    # Allow admins
-    if is_admin(user.id):
-        return
+    # Allow global admins OR group admins
+if is_admin(user.id) or is_group_admin(context.bot, msg.chat_id, user.id):
+    return
 
     text = msg.text or ""
 
