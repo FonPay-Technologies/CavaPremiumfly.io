@@ -13,6 +13,8 @@ from telegram.ext import (
     Filters,
     ChatMemberHandler  # If you use join detection
 )
+import re
+from telegram.error import BadRequest
 
 # -------------------- CONFIG --------------------
 # You provided these values
