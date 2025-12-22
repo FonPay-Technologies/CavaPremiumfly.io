@@ -704,6 +704,8 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("setads", setads_cmd))
     dp.add_handler(CommandHandler("getads", getads_cmd))
     dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
+    dp.add_handler(CommandHandler("warned", warned_list))
+    dp.add_handler(CommandHandler("banned", banned_list))
 
     # Join detection: ChatMemberHandler (PTB v13) + new_chat_members fallback
     try:
