@@ -476,6 +476,55 @@ def set_monetag_zone_cmd(update, context):
     MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}"
     update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")
 
+import re
+
+LINK_REGEX = re.compile(r"(http://|https://|t\.me/|www\.)", re.IGNORECASE)
+MENTION_REGEX = re.compile(r"@\w+")
+
+ALLOWED_MENTION = "@ejimurphy"
+
+def handle_violation(update, context, reason):
+    user = update.effective_user
+    chat = update.effective_chat
+
+    if not user or not chat:
+        return
+
+    uid = user.id
+    violations[uid] = violations.get(uid, 0) + 1
+    count = violations[uid]
+
+    try:
+        # Delete offending message
+        update.message.delete()
+    except:
+        pass
+
+    if count == 1:
+        context.bot.send_message(
+            chat_id=chat.id,
+            text=f"⚠️ {user.first_name}, warning!\nReason: {reason}\nNext violation = mute."
+        )
+
+    elif count == 2:
+        context.bot.restrict_chat_member(
+            chat_id=chat.id,
+            user_id=uid,
+            permissions=telegram.ChatPermissions(can_send_messages=False),
+            until_date=int(time.time()) + 86400
+        )
+        context.bot.send_message(
+            chat_id=chat.id,
+            text=f"🔇 {user.first_name} has been muted for 24 hours.\nReason: {reason}"
+        )
+
+    else:
+        context.bot.ban_chat_member(chat_id=chat.id, user_id=uid)
+        context.bot.send_message(
+            chat_id=chat.id,
+            text=f"⛔ {user.first_name} has been banned.\nReason: Repeated violations."
+        )
+
 # lightweight echo logger — no longer replies, only logs
 def echo_logger(update, context):
     try:
@@ -486,79 +535,31 @@ def echo_logger(update, context):
         logger.exception("echo_logger error")
     # intentionally do NOT reply to every message
 
-ALLOWED_MENTIONS = {"@ejimurphy"}
-
-LINK_REGEX = re.compile(
-    r"(https?://|www\.|t\.me/)",
-    re.IGNORECASE
-)
-
-MENTION_REGEX = re.compile(r"@\w+")
-
-
-def moderate_links_and_mentions(update, context):
-    message = update.effective_message
-    chat = update.effective_chat
+def moderation_handler(update, context):
+    msg = update.message
     user = update.effective_user
 
-    # Safety checks
-    if not message or not message.text:
+    if not msg or not user:
         return
 
-    # Only moderate GROUPS
-    if chat.type not in ("group", "supergroup"):
+    # Allow admins
+    if is_admin(user.id):
         return
 
-    # Ignore admins
-    try:
-        member = chat.get_member(user.id)
-        if member.status in ("administrator", "creator"):
+    text = msg.text or ""
+
+    # LINK DETECTION (non-admins only)
+    if LINK_REGEX.search(text):
+        handle_violation(update, context, "Posting links is not allowed.")
+        return
+
+    # MENTION DETECTION (non-admins only)
+    mentions = MENTION_REGEX.findall(text)
+    for mention in mentions:
+        if mention.lower() != ALLOWED_MENTION.lower():
+            handle_violation(update, context, "Unauthorized @mention detected.")
             return
-    except Exception:
-        pass
 
-    text = message.text.lower()
-
-    # Detect links
-    has_link = bool(LINK_REGEX.search(text))
-
-    # Detect mentions
-    mentions = set(MENTION_REGEX.findall(text))
-    illegal_mentions = {
-        m for m in mentions if m.lower() not in ALLOWED_MENTIONS
-    }
-
-    if has_link or illegal_mentions:
-        try:
-            # Delete message
-            message.delete()
-
-            # Ban user
-            context.bot.ban_chat_member(
-                chat_id=chat.id,
-                user_id=user.id
-            )
-
-            # Optional log message (auto-deletes)
-            warn = context.bot.send_message(
-                chat_id=chat.id,
-                text=(
-                    f"🚫 {user.first_name} was banned.\n"
-                    "Reason: Posting links or tagging users."
-                )
-            )
-
-            # Auto-delete warning after 5 seconds
-            context.bot.delete_message(
-                chat_id=chat.id,
-                message_id=warn.message_id,
-                timeout=5
-            )
-
-        except BadRequest as e:
-            logger.warning("Moderation failed: %s", e)
-
-        return
 
 # ======================================================
 # UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
@@ -676,13 +677,7 @@ if __name__ == "__main__":
         # If ChatMemberHandler import fails for any reason, skip — we still have the new_chat_members handler below
         logger.info("ChatMemberHandler not available; relying on message new_chat_members handler.")
 
-    dp.add_handler(
-    MessageHandler(
-        Filters.text & ~Filters.command,
-        moderate_links_and_mentions
-    ),
-    group=0
-)
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, moderation_handler), group=-1)
 
     # new_chat_members (older style) -> fallback / complementary
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_join_events), group=0)
