@@ -112,6 +112,11 @@ violations = {}  # user_id -> count
 warned_users = {}   # user_id -> name
 banned_users = {}   # user_id -> name
 
+# ---- Moderation storage ----
+WARNED_USERS = {}        # {chat_id: {user_id: count}}
+BANNED_USERS = {}        # {chat_id: set(user_id)}
+MODERATION_ENABLED = {}  # {chat_id: True/False}
+
 # -------------------- HTML: single ad-watching page (dynamic) --------------------
 HTML_PAGE = """
 <!doctype html>
