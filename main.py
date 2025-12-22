@@ -484,6 +484,22 @@ def set_monetag_zone_cmd(update, context):
     MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}"
     update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")
 
+def moderation_handler(update, context):
+    msg = update.effective_message
+    user = msg.from_user
+    chat_id = msg.chat_id
+
+    if not user:
+        return
+
+    # Skip if moderation disabled for this group
+    if not is_moderation_enabled(chat_id):
+        return
+
+    # Allow admins
+    if is_admin(user.id) or is_group_admin(context.bot, chat_id, user.id):
+        return
+
 def warned_list(update, context):
     if not is_admin(update.effective_user.id):
         return
