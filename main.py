@@ -533,6 +533,7 @@ def handle_violation(update, context, reason):
         pass
 
     if count == 1:
+        warned_users[uid] = user.first_name
         context.bot.send_message(
             chat_id=chat.id,
             text=f"⚠️ {user.first_name}, warning!\nReason: {reason}\nNext violation = mute."
@@ -551,6 +552,7 @@ def handle_violation(update, context, reason):
         )
 
     else:
+        banned_users[uid] = user.first_name
         context.bot.ban_chat_member(chat_id=chat.id, user_id=uid)
         context.bot.send_message(
             chat_id=chat.id,
