@@ -563,7 +563,21 @@ def unban(update, context):
 
     BANNED_USERS.setdefault(chat_id, set()).discard(user_id)
     update.message.reply_text(f"✅ User `{user_id}` unbanned", parse_mode="Markdown")
-    
+
+def mod_on(update, context):
+    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
+        return
+
+    MODERATION_ENABLED[update.effective_chat.id] = True
+    update.message.reply_text("🟢 Moderation ENABLED for this group")
+
+def mod_off(update, context):
+    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
+        return
+
+    MODERATION_ENABLED[update.effective_chat.id] = False
+    update.message.reply_text("🔴 Moderation DISABLED for this group")
+            
 import re
 
 LINK_REGEX = re.compile(r"(http://|https://|t\.me/|www\.)", re.IGNORECASE)
