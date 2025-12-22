@@ -476,6 +476,35 @@ def set_monetag_zone_cmd(update, context):
     MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}"
     update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")
 
+def warned_list(update, context):
+    if not is_admin(update.effective_user.id):
+        return
+
+    if not warned_users:
+        update.message.reply_text("✅ No warned users.")
+        return
+
+    text = "⚠️ Warned Users:\n"
+    for uid, name in warned_users.items():
+        text += f"- {name} (`{uid}`)\n"
+
+    update.message.reply_text(text, parse_mode="Markdown")
+
+
+def banned_list(update, context):
+    if not is_admin(update.effective_user.id):
+        return
+
+    if not banned_users:
+        update.message.reply_text("✅ No banned users.")
+        return
+
+    text = "⛔ Banned Users:\n"
+    for uid, name in banned_users.items():
+        text += f"- {name} (`{uid}`)\n"
+
+    update.message.reply_text(text, parse_mode="Markdown")
+
 import re
 
 LINK_REGEX = re.compile(r"(http://|https://|t\.me/|www\.)", re.IGNORECASE)
