@@ -577,7 +577,10 @@ def mod_off(update, context):
 
     MODERATION_ENABLED[update.effective_chat.id] = False
     update.message.reply_text("🔴 Moderation DISABLED for this group")
-            
+
+def is_moderation_enabled(chat_id):
+    return MODERATION_ENABLED.get(chat_id, True)
+    
 import re
 
 LINK_REGEX = re.compile(r"(http://|https://|t\.me/|www\.)", re.IGNORECASE)
