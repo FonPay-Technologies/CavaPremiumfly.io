@@ -106,6 +106,9 @@ verified_users = set() # completed users
 user_list = set()      # seen users (for broadcast / status)
 close_times = {}       # user_id -> timestamp when the client signalled close (beforeunload)
 
+# -------------------- MODERATION STATE --------------------
+violations = {}  # user_id -> count
+
 # -------------------- HTML: single ad-watching page (dynamic) --------------------
 HTML_PAGE = """
 <!doctype html>
