@@ -529,6 +529,41 @@ def banned_list(update, context):
 
     update.message.reply_text(text, parse_mode="Markdown")
 
+def unwarn(update, context):
+    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
+        update.message.reply_text("Admins only.")
+        return
+
+    if not context.args:
+        update.message.reply_text("Usage: /unwarn user_id")
+        return
+
+    user_id = int(context.args[0])
+    chat_id = update.effective_chat.id
+
+    WARNED_USERS.setdefault(chat_id, {}).pop(user_id, None)
+    update.message.reply_text(f"✅ Warnings cleared for user `{user_id}`", parse_mode="Markdown")
+
+def unban(update, context):
+    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
+        update.message.reply_text("Admins only.")
+        return
+
+    if not context.args:
+        update.message.reply_text("Usage: /unban user_id")
+        return
+
+    user_id = int(context.args[0])
+    chat_id = update.effective_chat.id
+
+    try:
+        context.bot.unban_chat_member(chat_id, user_id)
+    except:
+        pass
+
+    BANNED_USERS.setdefault(chat_id, set()).discard(user_id)
+    update.message.reply_text(f"✅ User `{user_id}` unbanned", parse_mode="Markdown")
+    
 import re
 
 LINK_REGEX = re.compile(r"(http://|https://|t\.me/|www\.)", re.IGNORECASE)
