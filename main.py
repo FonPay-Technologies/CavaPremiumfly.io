@@ -109,6 +109,9 @@ close_times = {}       # user_id -> timestamp when the client signalled close (b
 # -------------------- MODERATION STATE --------------------
 violations = {}  # user_id -> count
 
+warned_users = {}   # user_id -> name
+banned_users = {}   # user_id -> name
+
 # -------------------- HTML: single ad-watching page (dynamic) --------------------
 HTML_PAGE = """
 <!doctype html>
