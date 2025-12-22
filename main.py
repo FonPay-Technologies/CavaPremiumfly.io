@@ -577,17 +577,16 @@ def echo_logger(update, context):
     # intentionally do NOT reply to every message
 
 def moderation_handler(update, context):
-    msg = update.message
-    user = update.effective_user
+    msg = update.effective_message
+    user = msg.from_user
 
-    if not msg or not user:
+    # Ignore messages without users
+    if not user:
         return
 
-    # Allow global admins OR group admins
-if is_admin(user.id) or is_group_admin(context.bot, msg.chat_id, user.id):
-    return
-
-    text = msg.text or ""
+    # Allow global admins or group admins
+    if is_admin(user.id) or is_group_admin(context.bot, msg.chat_id, user.id):
+        return
 
     # LINK DETECTION (non-admins only)
     if LINK_REGEX.search(text):
