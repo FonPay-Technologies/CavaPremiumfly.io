@@ -623,7 +623,19 @@ def mod_off(update, context):
 
 def is_moderation_enabled(chat_id):
     return MODERATION_ENABLED.get(chat_id, True)
-    
+
+def is_group_admin(update, context):
+    chat = update.effective_chat
+    user = update.effective_user
+
+    if chat.type in ["group", "supergroup", "channel"]:
+        try:
+            member = context.bot.get_chat_member(chat.id, user.id)
+            return member.status in ["administrator", "creator"]
+        except:
+            return False
+    return False
+
 import re
 
 LINK_REGEX = re.compile(r"(http://|https://|t\.me/|www\.)", re.IGNORECASE)
