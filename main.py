@@ -16,6 +16,8 @@ from telegram.ext import (
 import re
 from telegram.error import BadRequest
 
+BOT_OWNER_ID = 5236441213,5725566044  # your Telegram user ID
+
 # -------------------- CONFIG --------------------
 # You provided these values
 TOKEN = os.environ.get("TOKEN") or "8325305060:AAGYUavCLlErFfGs-CXBiZT5YaMZaEKSCvI"
