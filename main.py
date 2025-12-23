@@ -364,7 +364,7 @@ def start_cmd(update, context):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-def help_command(update, context):
+def help_cmd(update, context):
     user_id = update.effective_user.id
     chat = update.effective_chat
 
