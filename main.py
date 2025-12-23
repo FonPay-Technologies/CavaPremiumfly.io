@@ -364,9 +364,14 @@ def start_cmd(update, context):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-def help_cmd(update, context):
-    text = (
-        "🤖 Bot Commands\n"
+def help_command(update, context):
+    user_id = update.effective_user.id
+    chat = update.effective_chat
+
+    # 👑 BOT OWNER (YOU) — SEE EVERYTHING
+    if user_id == BOT_OWNER_ID:
+        update.message.reply_text(
+        "👑 *Bot Owner Commands*\n\n"
         "/start - Open your ad page\n"
         "/help - Show this help\n\n"
         "Admin commands:\n"
@@ -382,7 +387,43 @@ def help_cmd(update, context):
         "/setads <n>  (admin)\n"
         "/getads\n"
         "/set_monetag_zone <zone>  (admin)\n"
-    )
+    
+        "🛡 *Moderation (All Groups)*\n"
+        "/modon\n"
+        "/modoff\n"
+        "/warn <user_id>\n"
+        "/unwarn <user_id>\n"
+        "/ban <user_id>\n"
+        "/unban <user_id>\n"
+        "/warnedlist\n"
+        "/bannedlist",
+        parse_mode="Markdown"
+        )
+        return
+
+    # 👮 GROUP / CHANNEL ADMIN — MODERATION ONLY
+    if is_group_admin(update, context):
+        update.message.reply_text(
+        "🛡 *Group Moderation Commands*\n\n"
+        "/modon – Enable moderation\n"
+        "/modoff – Disable moderation\n"
+        "/warn <user_id>\n"
+        "/unwarn <user_id>\n"
+        "/ban <user_id>\n"
+        "/unban <user_id>\n"
+        "/warnedlist\n"
+        "/bannedlist\n\n"
+        "⚠️ Applies only to *this group/channel*",
+            parse_mode="Markdown"
+        )
+        return
+
+    # 👤 NORMAL USERS — BASIC INFO ONLY
+    update.message.reply_text(
+        "ℹ️ This bot helps manage spam and protect groups.\n\n"
+        "Contact a group admin if you need help."
+            )
+    
     update.message.reply_text(text)
 
 def updategift_cmd(update, context):
