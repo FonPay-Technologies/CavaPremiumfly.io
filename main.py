@@ -372,13 +372,12 @@ def start_cmd(update, context):
     )
 
 def help_cmd(update, context):
-    user_id = update.effective_user.id
     chat = update.effective_chat
 
-    # 👑 BOT OWNER (YOU) — SEE EVERYTHING
-    if user_id == BOT_OWNER_ID:
+    # BOT OWNER (PRIVATE)
+    if chat.type == "private":
         update.message.reply_text(
-        "👑 *Bot Owner Commands*\n\n"
+            "🤖 Bot Commands (Owner Only)\n"
         "/start - Open your ad page\n"
         "/help - Show this help\n\n"
         "Admin commands:\n"
@@ -395,7 +394,13 @@ def help_cmd(update, context):
         "/getads\n"
         "/set_monetag_zone <zone>  (admin)\n"
     
-        "🛡 *Moderation (All Groups)*\n"
+        )
+        return
+
+    # GROUP / CHANNEL ADMINS ONLY
+    if is_group_admin(update, context):
+        update.message.reply_text(
+            "🛡 Moderation Commands (Admins Only)\n"
         "/modon\n"
         "/modoff\n"
         "/warn <user_id>\n"
