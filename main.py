@@ -215,6 +215,13 @@ window.addEventListener('beforeunload', function(){
   } catch(e){}
 });
 </script>
+<!-- Telega.io Mini App Monetization SDK -->
+<script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
+<script>
+  const ads = window.TelegaIn.AdsController.create_miniapp({
+    token: 'ca7256f5-479b-485c-aee8-a11e0b9d9d5f'
+  });
+</script>
 </body>
 </html>
 """
