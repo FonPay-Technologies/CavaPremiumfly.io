@@ -701,8 +701,8 @@ def handle_violation(update, context, reason):
 
 def is_group_admin(bot, chat_id, user_id):
     try:
-        admins = bot.get_chat_administrators(chat_id)
-        return any(admin.user.id == user_id for admin in admins)
+        member = bot.get_chat_member(chat_id, user_id)
+        return member.status in ("administrator", "creator")
     except:
         return False
         
