@@ -963,7 +963,7 @@ def error_handler(update, context):
         exc_info=context.error
     )
 
-dispatcher.add_error_handler(error_handler)
+updater.dispatcher.add_error_handler(error_handler)
 
     # ------------------------------
 # Webhook configuration for Render
