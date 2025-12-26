@@ -966,29 +966,29 @@ def error_handler(update, context):
 dispatcher.add_error_handler(error_handler)
 
     # ------------------------------
-    # Webhook configuration for Render
-    # ------------------------------
-    # Expose bot + updater to the Flask webhook route already defined above
-    app.config["bot_bot"] = bot
-    app.config["bot_updater"] = updater
+# Webhook configuration for Render
+# ------------------------------
+# Expose bot + updater to the Flask webhook route already defined above
+app.config["bot_bot"] = bot
+app.config["bot_updater"] = updater
 
-    # Build webhook URL from environment (Render provides HTTPS domain)
-    WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
-    if not WEB_URL:
-        logger.error("RENDER_EXTERNAL_URL is not set. Webhook won't be configured.")
-    else:
-        webhook_url = f"{WEB_URL.rstrip('/')}/webhook"
-        try:
-            # Remove any previously set webhook and set the new one
-            bot.delete_webhook()
-            bot.set_webhook(url=webhook_url)
-            logger.info("✅ Webhook set to: %s", webhook_url)
-        except Exception as e:
-            logger.exception("Failed to set webhook: %s", e)
+# Build webhook URL from environment (Render provides HTTPS domain)
+WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
+if not WEB_URL:
+    logger.error("RENDER_EXTERNAL_URL is not set. Webhook won't be configured.")
+else:
+    webhook_url = f"{WEB_URL.rstrip('/')}/webhook"
+    try:
+        # Remove any previously set webhook and set the new one
+        bot.delete_webhook()
+        bot.set_webhook(url=webhook_url)
+        logger.info("✅ Webhook set to: %s", webhook_url)
+    except Exception as e:
+        logger.exception("Failed to set webhook: %s", e)
 
-    # Note: we DON'T call updater.start_webhook() here because the Flask route
-    # will receive and dispatch incoming updates (updater.dispatcher.process_update).
-    # Start the Flask app (Render will bind to the PORT)
-    port = int(os.environ.get("PORT", 5000))
-    logger.info("Starting Flask (and webhook receiver) on port %s", port)
-    app.run(host="0.0.0.0", port=port)
+# Note: we DON'T call updater.start_webhook() here because the Flask route
+# will receive and dispatch incoming updates (updater.dispatcher.process_update).
+# Start the Flask app (Render will bind to the PORT)
+port = int(os.environ.get("PORT", 5000))
+logger.info("Starting Flask (and webhook receiver) on port %s", port)
+app.run(host="0.0.0.0", port=port)
