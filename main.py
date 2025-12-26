@@ -761,12 +761,33 @@ def moderation_handler(update, context):
     if not message:
         return
 
+    user = message.from_user
+    chat = update.effective_chat
+
+    # Ignore bot messages
+    if user and user.is_bot:
+        return
+
     text = message.text or message.caption or ""
 
-    # LINK DETECTION (non-admins only)
-    if LINK_REGEX.search(text):
-        handle_violation(update, context, "Posting links is not allowed.")
+    if not text:
         return
+
+    # Example: link detection
+    if LINK_REGEX.search(text):
+        try:
+            message.delete()
+        except Exception:
+            pass
+
+        if user:
+            try:
+                context.bot.ban_chat_member(
+                    chat_id=chat.id,
+                    user_id=user.id
+                )
+            except Exception:
+                pass
 
     # MENTION DETECTION (non-admins only)
     mentions = MENTION_REGEX.findall(text)
