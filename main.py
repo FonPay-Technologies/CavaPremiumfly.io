@@ -544,12 +544,13 @@ def set_monetag_zone_cmd(update, context):
     update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")
 
 def moderation_handler(update, context):
-    msg = update.effective_message
-    user = msg.from_user
-    chat_id = msg.chat_id
-
-    if not user:
+    message = update.effective_message
+    if not message:
         return
+
+    # 🔥 FIX: define text safely
+    text = message.text or message.caption or ""
+
 
     # Skip if moderation disabled for this group
     if not is_moderation_enabled(chat_id):
