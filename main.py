@@ -756,7 +756,7 @@ def moderation_handler(update, context):
     if is_admin(user.id) or is_group_admin(context.bot, msg.chat_id, user.id):
         return
 
-    def moderation_handler(update, context):
+def moderation_handler(update, context):
     message = update.effective_message
     if not message:
         return
