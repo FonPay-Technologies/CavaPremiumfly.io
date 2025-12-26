@@ -756,6 +756,13 @@ def moderation_handler(update, context):
     if is_admin(user.id) or is_group_admin(context.bot, msg.chat_id, user.id):
         return
 
+    def moderation_handler(update, context):
+    message = update.effective_message
+    if not message:
+        return
+
+    text = message.text or message.caption or ""
+
     # LINK DETECTION (non-admins only)
     if LINK_REGEX.search(text):
         handle_violation(update, context, "Posting links is not allowed.")
