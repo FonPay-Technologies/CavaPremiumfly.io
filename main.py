@@ -762,7 +762,30 @@ def moderation_handler(update, context):
             handle_violation(update, context, "Unauthorized @mention detected.")
             return
 
+def strict_group_moderation(update, context):
+    message = update.effective_message
+    chat = update.effective_chat
+    user = message.from_user
 
+    # Ignore owner
+    if user.id == BOT_OWNER_ID:
+        return
+
+    # Ignore admins
+    if is_group_admin(context.bot, chat.id, user.id):
+        return
+
+    # Block bot messages
+    if is_message_from_bot(message):
+        context.bot.delete_message(chat.id, message.message_id)
+        context.bot.ban_chat_member(chat.id, user.id)
+        return
+
+    # Block links, buttons, mentions
+    if contains_forbidden_content(message):
+        context.bot.delete_message(chat.id, message.message_id)
+        context.bot.ban_chat_member(chat.id, user.id)
+        
 # ======================================================
 # UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
 # ======================================================
@@ -873,10 +896,10 @@ if __name__ == "__main__":
     dp.add_handler(CommandHandler("warned", warned_list))
     dp.add_handler(CommandHandler("banned", banned_list))
     dp.add_handler(CommandHandler("unwarn", unwarn))
-    dp.add_handler(CommandHandler("unban", unban))
     dp.add_handler(CommandHandler("mod_on", mod_on))
     dp.add_handler(CommandHandler("mod_off", mod_off))
-
+    dp.add_handler(CommandHandler("unban", unban_cmd))
+    
     # Join detection: ChatMemberHandler (PTB v13) + new_chat_members fallback
     try:
         from telegram.ext import ChatMemberHandler
@@ -892,7 +915,13 @@ if __name__ == "__main__":
 
     # Log text messages (no reply)
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
-
+    dp.add_handler(
+    MessageHandler(
+        Filters.group & ~Filters.command,
+        strict_group_moderation
+    )
+        )
+    
     # ------------------------------
     # Webhook configuration for Render
     # ------------------------------
