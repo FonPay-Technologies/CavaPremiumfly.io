@@ -604,38 +604,20 @@ def unwarn(update, context):
     WARNED_USERS.setdefault(chat_id, {}).pop(user_id, None)
     update.message.reply_text(f"✅ Warnings cleared for user `{user_id}`", parse_mode="Markdown")
 
-def mod_on(update, context):
-    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
-        return
-
-    MODERATION_ENABLED[update.effective_chat.id] = True
-    update.message.reply_text("🟢 Moderation ENABLED for this group")
-
-def mod_off(update, context):
-    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
-        return
-
-    MODERATION_ENABLED[update.effective_chat.id] = False
-    update.message.reply_text("🔴 Moderation DISABLED for this group")
-
-def is_moderation_enabled(chat_id):
-    return MODERATION_ENABLED.get(chat_id, True)
-
-def unban_cmd(update, context):
 def unban_cmd(update, context):
     chat = update.effective_chat
     user = update.effective_user
 
-    # Admin / owner check
+    # Allow bot owner OR group/channel admin
     if not is_group_admin(context.bot, chat.id, user.id) and user.id != BOT_OWNER_ID:
         update.message.reply_text("❌ Admin-only command.")
         return
 
-    # CASE 1: Reply-based unban
+    # Reply-based unban
     if update.message.reply_to_message:
         target_id = update.message.reply_to_message.from_user.id
 
-    # CASE 2: Numeric ID
+    # Numeric ID unban
     elif context.args and context.args[0].isdigit():
         target_id = int(context.args[0])
 
@@ -652,6 +634,23 @@ def unban_cmd(update, context):
         update.message.reply_text("✅ User has been unbanned.")
     except Exception as e:
         update.message.reply_text(f"❌ Failed to unban: {e}")
+        
+def mod_on(update, context):
+    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
+        return
+
+    MODERATION_ENABLED[update.effective_chat.id] = True
+    update.message.reply_text("🟢 Moderation ENABLED for this group")
+
+def mod_off(update, context):
+    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
+        return
+
+    MODERATION_ENABLED[update.effective_chat.id] = False
+    update.message.reply_text("🔴 Moderation DISABLED for this group")
+
+def is_moderation_enabled(chat_id):
+    return MODERATION_ENABLED.get(chat_id, True)
     
 def can_moderate(update, context):
     user_id = update.effective_user.id
