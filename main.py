@@ -603,26 +603,6 @@ def unwarn(update, context):
     WARNED_USERS.setdefault(chat_id, {}).pop(user_id, None)
     update.message.reply_text(f"✅ Warnings cleared for user `{user_id}`", parse_mode="Markdown")
 
-def unban(update, context):
-    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
-        update.message.reply_text("Admins only.")
-        return
-
-    if not context.args:
-        update.message.reply_text("Usage: /unban user_id")
-        return
-
-    user_id = int(context.args[0])
-    chat_id = update.effective_chat.id
-
-    try:
-        context.bot.unban_chat_member(chat_id, user_id)
-    except:
-        pass
-
-    BANNED_USERS.setdefault(chat_id, set()).discard(user_id)
-    update.message.reply_text(f"✅ User `{user_id}` unbanned", parse_mode="Markdown")
-
 def mod_on(update, context):
     if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
         return
@@ -640,6 +620,21 @@ def mod_off(update, context):
 def is_moderation_enabled(chat_id):
     return MODERATION_ENABLED.get(chat_id, True)
 
+def unban_cmd(update, context):
+    if not can_moderate(update, context):
+        update.message.reply_text("❌ Admin only command")
+        return
+
+    if not context.args:
+        update.message.reply_text("Usage: /unban user_id")
+        return
+
+    user_id = int(context.args[0])
+    chat_id = update.effective_chat.id
+
+    context.bot.unban_chat_member(chat_id, user_id)
+    update.message.reply_text("✅ User unbanned successfully")
+    
 def is_group_admin(update, context):
     chat = update.effective_chat
     user = update.effective_user
@@ -650,8 +645,31 @@ def is_group_admin(update, context):
             return member.status in ["administrator", "creator"]
         except:
             return False
-    return False
 
+def can_moderate(update, context):
+    user_id = update.effective_user.id
+    chat_id = update.effective_chat.id
+
+    # Bot owner always allowed
+    if user_id == BOT_OWNER_ID:
+        return True
+
+    return is_group_admin(context.bot, chat_id, user_id)
+    
+def is_message_from_bot(message):
+    return message.from_user and message.from_user.is_bot
+
+def contains_forbidden_content(message):
+    if message.entities:
+        for e in message.entities:
+            if e.type in ("url", "text_link", "mention"):
+                return True
+
+    if message.reply_markup:
+        return True  # inline buttons
+
+    return False
+    
 import re
 
 LINK_REGEX = re.compile(r"(http://|https://|t\.me/|www\.)", re.IGNORECASE)
