@@ -621,31 +621,37 @@ def is_moderation_enabled(chat_id):
     return MODERATION_ENABLED.get(chat_id, True)
 
 def unban_cmd(update, context):
-    if not can_moderate(update, context):
-        update.message.reply_text("❌ Admin only command")
-        return
-
-    if not context.args:
-        update.message.reply_text("Usage: /unban user_id")
-        return
-
-    user_id = int(context.args[0])
-    chat_id = update.effective_chat.id
-
-    context.bot.unban_chat_member(chat_id, user_id)
-    update.message.reply_text("✅ User unbanned successfully")
-    
-def is_group_admin(update, context):
+def unban_cmd(update, context):
     chat = update.effective_chat
     user = update.effective_user
 
-    if chat.type in ["group", "supergroup", "channel"]:
-        try:
-            member = context.bot.get_chat_member(chat.id, user.id)
-            return member.status in ["administrator", "creator"]
-        except:
-            return False
+    # Admin / owner check
+    if not is_group_admin(context.bot, chat.id, user.id) and user.id != BOT_OWNER_ID:
+        update.message.reply_text("❌ Admin-only command.")
+        return
 
+    # CASE 1: Reply-based unban
+    if update.message.reply_to_message:
+        target_id = update.message.reply_to_message.from_user.id
+
+    # CASE 2: Numeric ID
+    elif context.args and context.args[0].isdigit():
+        target_id = int(context.args[0])
+
+    else:
+        update.message.reply_text(
+            "⚠️ Usage:\n"
+            "/unban <user_id>\n"
+            "OR reply to the user's message with /unban"
+        )
+        return
+
+    try:
+        context.bot.unban_chat_member(chat.id, target_id)
+        update.message.reply_text("✅ User has been unbanned.")
+    except Exception as e:
+        update.message.reply_text(f"❌ Failed to unban: {e}")
+    
 def can_moderate(update, context):
     user_id = update.effective_user.id
     chat_id = update.effective_chat.id
