@@ -919,8 +919,6 @@ if __name__ == "__main__":
     # new_chat_members (older style) -> fallback / complementary
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_join_events), group=0)
 
-    # Log text messages (no reply)
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
     dp.add_handler(
     MessageHandler(
         Filters.group & ~Filters.command,
@@ -928,6 +926,14 @@ if __name__ == "__main__":
     )
         )
     
+    # Log text messages (no reply)
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
+ 
+    def error_handler(update, context):
+    logging.exception("Telegram error:", exc_info=context.error)
+
+dispatcher.add_error_handler(error_handler)
+
     # ------------------------------
     # Webhook configuration for Render
     # ------------------------------
