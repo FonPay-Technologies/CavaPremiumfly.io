@@ -957,7 +957,7 @@ if __name__ == "__main__":
     # Log text messages (no reply)
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
  
-    def error_handler(update, context):
+def error_handler(update, context):
     logging.exception(
         "Telegram error:",
         exc_info=context.error
