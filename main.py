@@ -657,6 +657,10 @@ MENTION_REGEX = re.compile(r"@\w+")
 ALLOWED_MENTION = "@ejimurphy"
 
 # ------------------ HELPERS ------------------
+def is_bot_admin(user_id):
+    return int(user_id) in ADMIN_IDS
+
+
 def error_handler(update, context):
     logging.exception(
         "Telegram error:",
