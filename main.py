@@ -457,94 +457,62 @@ def help_cmd(update, context):
     chat = update.effective_chat
     user = update.effective_user
 
-    # ====================
-    # 👑 BOT OWNER (ANY CHAT)
-    # ====================
-    if user.id == BOT_OWNER_ID:
-        update.message.reply_text(
-            "👑 *Bot Owner Commands*\n\n"
-            "*General*\n"
-            "/start\n"
-            "/help\n\n"
-
-            "*Admin / System*\n"
-            "/updategift\n"
-            "/getgift\n"
-            "/resetads\n"
-            "/broadcast\n"
-            "/setmode\n"
-            "/switchmode\n"
-            "/setpromo\n"
-            "/currentmode\n"
-            "/status\n"
-            "/setads\n"
-            "/getads\n"
-            "/set_monetag_zone\n\n"
-
-            "*Moderation*\n"
-            "/mod_on\n"
-            "/mod_off\n"
-            "/warn\n"
-            "/unwarn\n"
-            "/ban\n"
-            "/unban\n"
-            "/warned\n"
-            "/banned",
-            parse_mode="Markdown"
-        )
-        return
-
-    # ====================
-    # 🛡 ADMINS IN BOT PRIVATE CHAT
-    # ====================
-    if chat.type == "private" and is_bot_admin(user.id):
-        update.message.reply_text(
-            "🛡 *Admin Commands*\n\n"
-            "/start\n"
-            "/help\n\n"
-            "*Moderation*\n"
-            "/mod_on\n"
-            "/mod_off\n"
-            "/warn\n"
-            "/unwarn\n"
-            "/ban\n"
-            "/unban\n"
-            "/warned\n"
-            "/banned",
-            parse_mode="Markdown"
-        )
-        return
-
-    # ====================
-    # 🛡 ADMINS IN GROUP / CHANNEL
-    # ====================
-    if chat.type in ("group", "supergroup", "channel") and \
-       is_group_admin(context.bot, chat.id, user.id):
-
-        update.message.reply_text(
-            "🛡 *Group Moderation Commands*\n\n"
-            "/mod_on\n"
-            "/mod_off\n"
-            "/warn\n"
-            "/unwarn\n"
-            "/ban\n"
-            "/unban\n"
-            "/warned\n"
-            "/banned",
-            parse_mode="Markdown"
-        )
-        return
-
-    # ====================
-    # 👤 NORMAL USERS
-    # ====================
-    update.message.reply_text(
-        "ℹ️ *Available Commands*\n\n"
-        "/start – Start watching ads\n"
-        "/help – Show help",
-        parse_mode="Markdown"
+    is_owner = user.id == BOT_OWNER_ID
+    is_bot_admin_user = is_bot_admin(user.id)
+    is_group_admin_user = (
+        chat.type in ("group", "supergroup", "channel")
+        and is_group_admin(context.bot, chat.id, user.id)
     )
 
+    text = ""
+
+    # ====================
+    # 👤 USER COMMANDS (EVERYONE)
+    # ====================
+    text += (
+        "🤖 *User Commands*\n"
+        "/start – Open your ad page\n"
+        "/help – Show this help\n\n"
+    )
+
+    # ====================
+    # 🛡 MODERATION COMMANDS
+    # ====================
+    if is_group_admin_user or is_bot_admin_user or is_owner:
+        text += (
+            "🛡 *Moderator Commands*\n"
+            "/mod_on – Enable moderation\n"
+            "/mod_off – Disable moderation\n"
+            "/warn <reply | user_id>\n"
+            "/unwarn <reply | user_id>\n"
+            "/ban <reply | user_id>\n"
+            "/unban <reply | user_id>\n"
+            "/warned – List warned users\n"
+            "/banned – List banned users\n\n"
+        )
+
+    # ====================
+    # 👑 BOT ADMIN / OWNER
+    # ====================
+    if is_bot_admin_user or is_owner:
+        text += (
+            "👑 *Admin Commands*\n"
+            "/updategift <link>\n"
+            "/getgift\n"
+            "/resetads\n"
+            "/broadcast <msg>\n"
+            "/setmode <monetag|promo>\n"
+            "/switchmode\n"
+            "/setpromo <link>\n"
+            "/currentmode\n"
+            "/status\n"
+            "/setads <n>\n"
+            "/getads\n"
+            "/set_monetag_zone <zone>\n"
+        )
+
+    update.message.reply_text(text, parse_mode="Markdown")
+    
 def updategift_cmd(update, context):
     if not is_admin(update.effective_user.id):
         return update.message.reply_text("🚫 Admin only.")
