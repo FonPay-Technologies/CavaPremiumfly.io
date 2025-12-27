@@ -541,285 +541,51 @@ def set_monetag_zone_cmd(update, context):
         return update.message.reply_text("Usage: /set_monetag_zone <zone_id>")
     MONETAG_ZONE = context.args[0].strip()
     MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}"
-    update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")
+    update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")     
 
-def moderation_handler(update, context):
+    def moderation_handler(update, context):
     message = update.effective_message
     if not message:
         return
 
-    # 🔥 FIX: define text safely
-    text = message.text or message.caption or ""
-
-
-    # Skip if moderation disabled for this group
-    if not is_moderation_enabled(chat_id):
-        return
-
-    # Allow admins
-    if is_admin(user.id) or is_group_admin(context.bot, chat_id, user.id):
-        return
-
-def warned_list(update, context):
-    if not is_admin(update.effective_user.id):
-        return
-
-    if not warned_users:
-        update.message.reply_text("✅ No warned users.")
-        return
-
-    text = "⚠️ Warned Users:\n"
-    for uid, name in warned_users.items():
-        text += f"- {name} (`{uid}`)\n"
-
-    update.message.reply_text(text, parse_mode="Markdown")
-
-
-def banned_list(update, context):
-    if not is_admin(update.effective_user.id):
-        return
-
-    if not banned_users:
-        update.message.reply_text("✅ No banned users.")
-        return
-
-    text = "⛔ Banned Users:\n"
-    for uid, name in banned_users.items():
-        text += f"- {name} (`{uid}`)\n"
-
-    update.message.reply_text(text, parse_mode="Markdown")
-
-def unwarn(update, context):
-    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
-        update.message.reply_text("Admins only.")
-        return
-
-    if not context.args:
-        update.message.reply_text("Usage: /unwarn user_id")
-        return
-
-    user_id = int(context.args[0])
-    chat_id = update.effective_chat.id
-
-    WARNED_USERS.setdefault(chat_id, {}).pop(user_id, None)
-    update.message.reply_text(f"✅ Warnings cleared for user `{user_id}`", parse_mode="Markdown")
-
-def unban_cmd(update, context):
-    chat = update.effective_chat
-    user = update.effective_user
-
-    # Allow bot owner OR group/channel admin
-    if not is_group_admin(context.bot, chat.id, user.id) and user.id != BOT_OWNER_ID:
-        update.message.reply_text("❌ Admin-only command.")
-        return
-
-    # Reply-based unban
-    if update.message.reply_to_message:
-        target_id = update.message.reply_to_message.from_user.id
-
-    # Numeric ID unban
-    elif context.args and context.args[0].isdigit():
-        target_id = int(context.args[0])
-
-    else:
-        update.message.reply_text(
-            "⚠️ Usage:\n"
-            "/unban <user_id>\n"
-            "OR reply to the user's message with /unban"
-        )
-        return
-
-    try:
-        context.bot.unban_chat_member(chat.id, target_id)
-        update.message.reply_text("✅ User has been unbanned.")
-    except Exception as e:
-        update.message.reply_text(f"❌ Failed to unban: {e}")
-        
-def mod_on(update, context):
-    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
-        return
-
-    MODERATION_ENABLED[update.effective_chat.id] = True
-    update.message.reply_text("🟢 Moderation ENABLED for this group")
-
-def mod_off(update, context):
-    if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
-        return
-
-    MODERATION_ENABLED[update.effective_chat.id] = False
-    update.message.reply_text("🔴 Moderation DISABLED for this group")
-
-def is_moderation_enabled(chat_id):
-    return MODERATION_ENABLED.get(chat_id, True)
-    
-def can_moderate(update, context):
-    user_id = update.effective_user.id
-    chat_id = update.effective_chat.id
-
-    # Bot owner always allowed
-    if user_id == BOT_OWNER_ID:
-        return True
-
-    return is_group_admin(context.bot, chat_id, user_id)
-    
-def is_message_from_bot(message):
-    return message.from_user and message.from_user.is_bot
-
-def contains_forbidden_content(message):
-    if message.entities:
-        for e in message.entities:
-            if e.type in ("url", "text_link", "mention"):
-                return True
-
-    if message.reply_markup:
-        return True  # inline buttons
-
-    return False
-    
-import re
-
-LINK_REGEX = re.compile(r"(http://|https://|t\.me/|www\.)", re.IGNORECASE)
-MENTION_REGEX = re.compile(r"@\w+")
-
-ALLOWED_MENTION = "@ejimurphy"
-
-def handle_violation(update, context, reason):
-    user = update.effective_user
+    user = message.from_user
     chat = update.effective_chat
 
     if not user or not chat:
         return
 
-    uid = user.id
-    violations[uid] = violations.get(uid, 0) + 1
-    count = violations[uid]
-
-    try:
-        # Delete offending message
-        update.message.delete()
-    except:
-        pass
-
-    if count == 1:
-        warned_users[uid] = user.first_name
-        context.bot.send_message(
-            chat_id=chat.id,
-            text=f"⚠️ {user.first_name}, warning!\nReason: {reason}\nNext violation = mute."
-        )
-
-    elif count == 2:
-        context.bot.restrict_chat_member(
-            chat_id=chat.id,
-            user_id=uid,
-            permissions=telegram.ChatPermissions(can_send_messages=False),
-            until_date=int(time.time()) + 86400
-        )
-        context.bot.send_message(
-            chat_id=chat.id,
-            text=f"🔇 {user.first_name} has been muted for 24 hours.\nReason: {reason}"
-        )
-
-    else:
-        banned_users[uid] = user.first_name
-        context.bot.ban_chat_member(chat_id=chat.id, user_id=uid)
-        context.bot.send_message(
-            chat_id=chat.id,
-            text=f"⛔ {user.first_name} has been banned.\nReason: Repeated violations."
-        )
-
-def is_group_admin(bot, chat_id, user_id):
-    try:
-        member = bot.get_chat_member(chat_id, user_id)
-        return member.status in ("administrator", "creator")
-    except:
-        return False
-        
-# lightweight echo logger — no longer replies, only logs
-def echo_logger(update, context):
-    try:
-        user = getattr(update, "effective_user", None)
-        text = (getattr(update.message, "text", "") or "")[:200]
-        logger.info("Msg from %s: %s", getattr(user, "id", "unknown"), text)
-    except Exception:
-        logger.exception("echo_logger error")
-    # intentionally do NOT reply to every message
-
-def moderation_handler(update, context):
-    msg = update.effective_message
-    user = msg.from_user
-
-    # Ignore messages without users
-    if not user:
-        return
-
-    # Allow global admins or group admins
-    if is_admin(user.id) or is_group_admin(context.bot, msg.chat_id, user.id):
-        return
-
-def moderation_handler(update, context):
-    message = update.effective_message
-    if not message:
-        return
-
-    user = message.from_user
-    chat = update.effective_chat
-
     # Ignore bot messages
-    if user and user.is_bot:
+    if user.is_bot:
         return
 
-    text = message.text or message.caption or ""
-
-    if not text:
-        return
-
-    # Example: link detection
-    if LINK_REGEX.search(text):
-        try:
-            message.delete()
-        except Exception:
-            pass
-
-        if user:
-            try:
-                context.bot.ban_chat_member(
-                    chat_id=chat.id,
-                    user_id=user.id
-                )
-            except Exception:
-                pass
-
-    # MENTION DETECTION (non-admins only)
-    mentions = MENTION_REGEX.findall(text)
-    for mention in mentions:
-        if mention.lower() != ALLOWED_MENTION.lower():
-            handle_violation(update, context, "Unauthorized @mention detected.")
-            return
-
-def strict_group_moderation(update, context):
-    message = update.effective_message
-    chat = update.effective_chat
-    user = message.from_user
-
-    # Ignore owner
+    # Allow owner
     if user.id == BOT_OWNER_ID:
         return
 
-    # Ignore admins
+    # Allow admins
     if is_group_admin(context.bot, chat.id, user.id):
         return
 
-    # Block bot messages
-    if is_message_from_bot(message):
-        context.bot.delete_message(chat.id, message.message_id)
-        context.bot.ban_chat_member(chat.id, user.id)
+    # Allow replies (VERY IMPORTANT)
+    if message.reply_to_message:
         return
 
-    # Block links, buttons, mentions
-    if contains_forbidden_content(message):
-        context.bot.delete_message(chat.id, message.message_id)
-        context.bot.ban_chat_member(chat.id, user.id)
-        
+    text = message.text or message.caption or ""
+    if not text:
+        return
+
+    # Block links (normal users only)
+    if LINK_REGEX.search(text):
+        handle_violation(update, context, "Unauthorized link")
+        return
+
+    # Block mentions (normal users only)
+    mentions = MENTION_REGEX.findall(text)
+    for mention in mentions:
+        if mention.lower() != ALLOWED_MENTION.lower():
+            handle_violation(update, context, "Unauthorized @mention")
+            return
+    
 # ======================================================
 # UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
 # ======================================================
