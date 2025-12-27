@@ -350,6 +350,24 @@ def is_admin(uid):
     return int(uid) in ADMIN_IDS
 
 def start_cmd(update, context):
+    user = update.effective_user
+    chat = update.effective_chat
+    bot = context.bot
+
+    # ==========================
+    # ROLE-BASED "/" COMMAND MENU
+    # ==========================
+    if user.id == BOT_OWNER_ID:
+        set_owner_commands(bot, chat.id)
+
+    elif chat.type in ("group", "supergroup", "channel") and \
+         is_group_admin(bot, chat.id, user.id):
+        set_group_admin_commands(bot, chat.id)
+
+    else:
+        set_user_commands(bot, chat.id)
+        
+def start_cmd(update, context):
     uid = update.effective_user.id
     ad_count.setdefault(uid, 0)
     user_list.add(uid)
