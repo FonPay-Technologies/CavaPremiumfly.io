@@ -547,6 +547,12 @@ MENTION_REGEX = re.compile(r"@\w+")
 ALLOWED_MENTION = "@ejimurphy"
 
 # ------------------ HELPERS ------------------
+def error_handler(update, context):
+    logging.exception(
+        "Telegram error:",
+        exc_info=context.error
+    )
+
 def echo_logger(update, context):
     try:
         user = getattr(update, "effective_user", None)
