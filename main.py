@@ -547,7 +547,7 @@ def set_monetag_zone_cmd(update, context):
     MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}"
     update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")     
 
-    def moderation_handler(update, context):
+def moderation_handler(update, context):
     message = update.effective_message
     if not message:
         return
