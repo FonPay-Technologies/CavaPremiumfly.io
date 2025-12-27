@@ -958,41 +958,54 @@ else:
 from telegram import BotCommand
 
 # 👤 Normal users (everyone)
-bot.set_my_commands([
-    BotCommand("start", "Start the bot"),
-    BotCommand("help", "Show help"),
-])
+def set_user_commands(bot, chat_id):
+    bot.set_my_commands(
+        [
+            BotCommand("start", "Start the bot"),
+            BotCommand("help", "Help"),
+        ],
+        chat_id=chat_id
+    )
 
 # 🛡 Group / Channel admins
-bot.set_my_commands([
-    BotCommand("help", "Admin help"),
-    BotCommand("mod_on", "Enable moderation"),
-    BotCommand("mod_off", "Disable moderation"),
-    BotCommand("warn", "Warn a user"),
-    BotCommand("unwarn", "Remove warning"),
-    BotCommand("ban", "Ban a user"),
-    BotCommand("unban", "Unban a user"),
-    BotCommand("warned", "List warned users"),
-    BotCommand("banned", "List banned users"),
-])
+def set_admin_commands(bot, chat_id):
+    bot.set_my_commands(
+        [
+            BotCommand("start", "Start the bot"),
+            BotCommand("help", "Help"),
+            BotCommand("mod_on", "Enable moderation"),
+            BotCommand("mod_off", "Disable moderation"),
+            BotCommand("warn", "Warn a user"),
+            BotCommand("unwarn", "Remove warning"),
+            BotCommand("warned", "List warned users"),
+            BotCommand("ban", "Ban a user"),
+            BotCommand("unban", "Unban a user"),
+            BotCommand("banned", "List banned users"),
+        ],
+        chat_id=chat_id
+    )
 
 # 👑 Bot owner (private chat only)
-bot.set_my_commands([
-    BotCommand("start", "Start bot"),
-    BotCommand("help", "Owner help"),
-    BotCommand("broadcast", "Broadcast message"),
-    BotCommand("updategift", "Update gift link"),
-    BotCommand("getgift", "Get gift"),
-    BotCommand("resetads", "Reset ads"),
-    BotCommand("setmode", "Set mode"),
-    BotCommand("switchmode", "Switch mode"),
-    BotCommand("setpromo", "Set promo link"),
-    BotCommand("currentmode", "Current mode"),
-    BotCommand("status", "Bot status"),
-    BotCommand("setads", "Set ads"),
-    BotCommand("getads", "Get ads"),
-    BotCommand("set_monetag_zone", "Set Monetag zone"),
-])
+def set_owner_commands(bot, chat_id):
+    bot.set_my_commands(
+        [
+            BotCommand("start", "Start bot"),
+            BotCommand("help", "Owner help"),
+            BotCommand("broadcast", "Broadcast"),
+            BotCommand("updategift", "Update gift"),
+            BotCommand("getgift", "Get gift"),
+            BotCommand("resetads", "Reset ads"),
+            BotCommand("setmode", "Set mode"),
+            BotCommand("switchmode", "Switch mode"),
+            BotCommand("setpromo", "Set promo"),
+            BotCommand("currentmode", "Current mode"),
+            BotCommand("status", "Bot status"),
+            BotCommand("setads", "Set ads"),
+            BotCommand("getads", "Get ads"),
+            BotCommand("set_monetag_zone", "Set Monetag zone"),
+        ],
+        chat_id=chat_id
+    )
 
 # Note: we DON'T call updater.start_webhook() here because the Flask route
 # will receive and dispatch incoming updates (updater.dispatcher.process_update).
