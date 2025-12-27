@@ -547,6 +547,15 @@ MENTION_REGEX = re.compile(r"@\w+")
 ALLOWED_MENTION = "@ejimurphy"
 
 # ------------------ HELPERS ------------------
+def echo_logger(update, context):
+    try:
+        user = getattr(update, "effective_user", None)
+        text = (getattr(update.message, "text", "") or "")[:200]
+        logger.info("Msg from %s: %s", getattr(user, "id", "unknown"), text)
+    except Exception:
+        logger.exception("echo_logger error")
+    # intentionally do NOT reply to every message
+
 def is_group_admin(bot, chat_id, user_id):
     try:
         member = bot.get_chat_member(chat_id, user_id)
