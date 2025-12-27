@@ -468,18 +468,18 @@ def help_cmd(update, context):
             "/help\n\n"
 
             "*Admin / System*\n"
-            "/updategift <link>\n"
+            "/updategift\n"
             "/getgift\n"
             "/resetads\n"
-            "/broadcast <msg>\n"
-            "/setmode <monetag|promo>\n"
+            "/broadcast\n"
+            "/setmode\n"
             "/switchmode\n"
-            "/setpromo <link>\n"
+            "/setpromo\n"
             "/currentmode\n"
             "/status\n"
-            "/setads <n>\n"
+            "/setads\n"
             "/getads\n"
-            "/set_monetag_zone <zone>\n\n"
+            "/set_monetag_zone\n\n"
 
             "*Moderation*\n"
             "/mod_on\n"
@@ -495,22 +495,42 @@ def help_cmd(update, context):
         return
 
     # ====================
-    # 🛡 GROUP / CHANNEL ADMINS
+    # 🛡 ADMINS IN BOT PRIVATE CHAT
+    # ====================
+    if chat.type == "private" and is_bot_admin(user.id):
+        update.message.reply_text(
+            "🛡 *Admin Commands*\n\n"
+            "/start\n"
+            "/help\n\n"
+            "*Moderation*\n"
+            "/mod_on\n"
+            "/mod_off\n"
+            "/warn\n"
+            "/unwarn\n"
+            "/ban\n"
+            "/unban\n"
+            "/warned\n"
+            "/banned",
+            parse_mode="Markdown"
+        )
+        return
+
+    # ====================
+    # 🛡 ADMINS IN GROUP / CHANNEL
     # ====================
     if chat.type in ("group", "supergroup", "channel") and \
        is_group_admin(context.bot, chat.id, user.id):
 
         update.message.reply_text(
-            "🛡 *Admin Moderation Commands*\n\n"
-            "/mod_on – Enable moderation\n"
-            "/mod_off – Disable moderation\n"
-            "/warn <user_id | reply>\n"
-            "/unwarn <user_id | reply>\n"
-            "/ban <user_id | reply>\n"
-            "/unban <user_id | reply>\n"
-            "/warned – List warned users\n"
-            "/banned – List banned users\n\n"
-            "⚠️ Commands apply to *this group/channel only*",
+            "🛡 *Group Moderation Commands*\n\n"
+            "/mod_on\n"
+            "/mod_off\n"
+            "/warn\n"
+            "/unwarn\n"
+            "/ban\n"
+            "/unban\n"
+            "/warned\n"
+            "/banned",
             parse_mode="Markdown"
         )
         return
@@ -519,10 +539,11 @@ def help_cmd(update, context):
     # 👤 NORMAL USERS
     # ====================
     update.message.reply_text(
-        "ℹ️ This bot helps manage ads and protect groups.\n\n"
-        "If you need help, contact a group admin."
+        "ℹ️ *Available Commands*\n\n"
+        "/start – Start watching ads\n"
+        "/help – Show help",
+        parse_mode="Markdown"
     )
-
 
 def updategift_cmd(update, context):
     if not is_admin(update.effective_user.id):
