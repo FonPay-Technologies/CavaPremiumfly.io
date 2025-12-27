@@ -348,6 +348,86 @@ def set_ads_count():
 # -------------------- TELEGRAM BOT HANDLERS --------------------
 def is_admin(uid):
     return int(uid) in ADMIN_IDS
+
+from telegram import BotCommand
+
+def set_user_commands(bot, chat_id):
+    bot.set_my_commands(
+        [
+            BotCommand("start", "Start watching ads"),
+            BotCommand("help", "Help"),
+        ],
+        chat_id=chat_id
+    )
+
+def set_group_admin_commands(bot, chat_id):
+    bot.set_my_commands(
+        [
+            BotCommand("start", "Start watching ads"),
+            BotCommand("help", "Help"),
+            BotCommand("mod_on", "Enable moderation"),
+            BotCommand("mod_off", "Disable moderation"),
+            BotCommand("warn", "Warn user"),
+            BotCommand("unwarn", "Remove warning"),
+            BotCommand("warned", "Warned users"),
+            BotCommand("ban", "Ban user"),
+            BotCommand("unban", "Unban user"),
+            BotCommand("banned", "Banned users"),
+        ],
+        chat_id=chat_id
+    )
+
+def set_owner_commands(bot, chat_id):
+    bot.set_my_commands(
+        [
+            # Ads Watch
+            BotCommand("start", "Start watching ads"),
+            BotCommand("help", "Help"),
+
+            # Owner system
+            BotCommand("broadcast", "Broadcast message"),
+            BotCommand("updategift", "Update gift"),
+            BotCommand("getgift", "Get gift"),
+            BotCommand("resetads", "Reset ads"),
+            BotCommand("setmode", "Set mode"),
+            BotCommand("switchmode", "Switch mode"),
+            BotCommand("setpromo", "Set promo"),
+            BotCommand("currentmode", "Current mode"),
+            BotCommand("status", "Bot status"),
+            BotCommand("setads", "Set ads"),
+            BotCommand("getads", "Get ads"),
+            BotCommand("set_monetag_zone", "Set Monetag zone"),
+
+            # Moderation
+            BotCommand("mod_on", "Enable moderation"),
+            BotCommand("mod_off", "Disable moderation"),
+            BotCommand("warn", "Warn user"),
+            BotCommand("unwarn", "Unwarn user"),
+            BotCommand("warned", "Warned users"),
+            BotCommand("ban", "Ban user"),
+            BotCommand("unban", "Unban user"),
+            BotCommand("banned", "Banned users"),
+        ],
+        chat_id=chat_id
+                      )
+            
+def start_cmd(update, context):
+    user = update.effective_user
+    chat = update.effective_chat
+    bot = context.bot
+
+    # ==========================
+    # ROLE-BASED "/" COMMAND MENU
+    # ==========================
+    if user.id == BOT_OWNER_ID:
+        set_owner_commands(bot, chat.id)
+
+    elif chat.type in ("group", "supergroup", "channel") and \
+         is_group_admin(bot, chat.id, user.id):
+        set_group_admin_commands(bot, chat.id)
+
+    else:
+        set_user_commands(bot, chat.id)
         
 def start_cmd(update, context):
     uid = update.effective_user.id
