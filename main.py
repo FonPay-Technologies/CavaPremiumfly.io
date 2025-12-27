@@ -911,58 +911,81 @@ if __name__ == "__main__":
     updater = Updater(bot=bot, use_context=True)
     dp = updater.dispatcher
 
-    # -------------------- HANDLER REGISTRATION --------------------
-    # Commands
-    dp.add_handler(CommandHandler("start", start_cmd))
-    dp.add_handler(CommandHandler("help", help_cmd))
-    dp.add_handler(CommandHandler("updategift", updategift_cmd))
-    dp.add_handler(CommandHandler("getgift", getgift_cmd))
-    dp.add_handler(CommandHandler("resetads", resetads_cmd))
-    dp.add_handler(CommandHandler("broadcast", broadcast_cmd))
-    dp.add_handler(CommandHandler("setmode", setmode_cmd))
-    dp.add_handler(CommandHandler("switchmode", switchmode_cmd))
-    dp.add_handler(CommandHandler("setpromo", setpromo_cmd))
-    dp.add_handler(CommandHandler("currentmode", currentmode_cmd))
-    dp.add_handler(CommandHandler("status", status_cmd))
-    dp.add_handler(CommandHandler("setads", setads_cmd))
-    dp.add_handler(CommandHandler("getads", getads_cmd))
-    dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
-    dp.add_handler(CommandHandler("warned", warned_list))
-    dp.add_handler(CommandHandler("banned", banned_list))
-    dp.add_handler(CommandHandler("unwarn", unwarn))
-    dp.add_handler(CommandHandler("mod_on", mod_on))
-    dp.add_handler(CommandHandler("mod_off", mod_off))
-    dp.add_handler(CommandHandler("unban", unban_cmd))
-    
-    # Join detection: ChatMemberHandler (PTB v13) + new_chat_members fallback
-    try:
-        from telegram.ext import ChatMemberHandler
-        dp.add_handler(ChatMemberHandler(handle_join_events, ChatMemberHandler.CHAT_MEMBER), group=0)
-    except Exception:
-        # If ChatMemberHandler import fails for any reason, skip — we still have the new_chat_members handler below
-        logger.info("ChatMemberHandler not available; relying on message new_chat_members handler.")
+# -------------------- HANDLER REGISTRATION --------------------
 
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, moderation_handler), group=-1)
+# ====================
+# 1️⃣ COMMAND HANDLERS
+# ====================
+dp.add_handler(CommandHandler("start", start_cmd))
+dp.add_handler(CommandHandler("help", help_cmd))
+dp.add_handler(CommandHandler("updategift", updategift_cmd))
+dp.add_handler(CommandHandler("getgift", getgift_cmd))
+dp.add_handler(CommandHandler("resetads", resetads_cmd))
+dp.add_handler(CommandHandler("broadcast", broadcast_cmd))
+dp.add_handler(CommandHandler("setmode", setmode_cmd))
+dp.add_handler(CommandHandler("switchmode", switchmode_cmd))
+dp.add_handler(CommandHandler("setpromo", setpromo_cmd))
+dp.add_handler(CommandHandler("currentmode", currentmode_cmd))
+dp.add_handler(CommandHandler("status", status_cmd))
+dp.add_handler(CommandHandler("setads", setads_cmd))
+dp.add_handler(CommandHandler("getads", getads_cmd))
+dp.add_handler(CommandHandler("set_monetag_zone", set_monetag_zone_cmd))
+dp.add_handler(CommandHandler("warned", warned_list))
+dp.add_handler(CommandHandler("banned", banned_list))
+dp.add_handler(CommandHandler("unwarn", unwarn))
+dp.add_handler(CommandHandler("mod_on", mod_on))
+dp.add_handler(CommandHandler("mod_off", mod_off))
+dp.add_handler(CommandHandler("unban", unban_cmd))
 
-    # new_chat_members (older style) -> fallback / complementary
-    dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_join_events), group=0)
 
+# ====================
+# 2️⃣ JOIN HANDLERS (EARLY)
+# ====================
+try:
+    from telegram.ext import ChatMemberHandler
     dp.add_handler(
-    MessageHandler(
-        Filters.group & ~Filters.command,
-        strict_group_moderation
+        ChatMemberHandler(handle_join_events, ChatMemberHandler.CHAT_MEMBER),
+        group=0
     )
-        )
-    
-    # Log text messages (no reply)
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo_logger))
- 
-def error_handler(update, context):
-    logging.exception(
-        "Telegram error:",
-        exc_info=context.error
-    )
+except Exception:
+    logger.info("ChatMemberHandler not available; relying on fallback.")
 
+dp.add_handler(
+    MessageHandler(Filters.status_update.new_chat_members, handle_join_events),
+    group=0
+)
+
+
+# ====================
+# 3️⃣ NORMAL MODERATION (WARN / MUTE / BAN LOGIC)
+# ====================
+dp.add_handler(
+    MessageHandler(Filters.text & ~Filters.command, moderation_handler),
+    group=1
+)
+
+
+# ====================
+# 4️⃣ STRICT GROUP MODERATION (LAST LINE OF DEFENSE)
+# ====================
+dp.add_handler(
+    MessageHandler(Filters.group & ~Filters.command, strict_group_moderation),
+    group=2
+)
+
+
+# ====================
+# 5️⃣ LOGGER (ABSOLUTELY LAST)
+# ====================
+dp.add_handler(
+    MessageHandler(Filters.text & ~Filters.command, echo_logger),
+    group=3
+)
+
+
+# ====================
+# 6️⃣ GLOBAL ERROR HANDLER
+# ====================
 updater.dispatcher.add_error_handler(error_handler)
 
     # ------------------------------
