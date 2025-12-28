@@ -920,7 +920,7 @@ def handle_join_events(update, context):
                 return
             welcomed.add(key)
 
-            BOT_LINK = "https://t.me/CanvaPremiumAccessbot?startapp"
+            BOT_LINK = "https://t.me/CanvaPro4all_bot?startapp"
             keyboard = InlineKeyboardMarkup(
                 [[InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]]
             )
