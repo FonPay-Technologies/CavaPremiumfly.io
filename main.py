@@ -817,37 +817,6 @@ def moderation_handler(update, context):
         if mention.lower() != ALLOWED_MENTION.lower():
             handle_violation(update, context, "Unauthorized @mention")
             return
-
-def should_skip_moderation(update, context):
-    message = update.effective_message
-    chat = update.effective_chat
-    user = update.effective_user
-
-    if not message:
-        return True
-
-    # ✅ Allow messages sent as channel or group
-    if message.sender_chat:
-        return True
-
-    # ✅ Ignore bots
-    if user and user.is_bot:
-        return True
-
-    # ✅ Allow bot owner
-    if user and user.id == BOT_OWNER_ID:
-        return True
-
-    # ✅ Allow bot admins
-    if user and is_bot_admin(user.id):
-        return True
-
-    # ✅ Allow group/channel admins
-    if user and chat.type in ("group", "supergroup", "channel"):
-        if is_group_admin(context.bot, chat.id, user.id):
-            return True
-
-    return False
     
 # ------------------ STRICT MODERATION ------------------
 def strict_group_moderation(update, context):
