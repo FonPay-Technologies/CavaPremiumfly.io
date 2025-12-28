@@ -821,31 +821,56 @@ def moderation_handler(update, context):
 # ------------------ STRICT MODERATION ------------------
 def strict_group_moderation(update, context):
     message = update.effective_message
+    if not message:
+        return
+
     chat = update.effective_chat
+    if not chat:
+        return
+
+    # ✅ ALLOW channel or group identity posts
+    if message.sender_chat:
+        return
+
     user = message.from_user
-
-    # Ignore owner and admins
-    if user.id == BOT_OWNER_ID or is_group_admin(context.bot, chat.id, user.id):
+    if not user:
         return
 
-    # Block bot messages
+    # ✅ Allow bots
     if user.is_bot:
-        try:
-            context.bot.delete_message(chat.id, message.message_id)
-        except:
-            pass
-        context.bot.ban_chat_member(chat.id, user.id)
         return
 
-    # Block forbidden content
-    if message.entities or message.reply_markup:
+    # ✅ Allow bot owner
+    if user.id == BOT_OWNER_ID:
+        return
+
+    # ✅ Allow bot admins
+    if is_admin(user.id):
+        return
+
+    # ✅ Allow group/channel admins
+    if is_group_admin(context.bot, chat.id, user.id):
+        return
+
+    # ❌ FROM HERE — NORMAL USERS ONLY
+
+    # Block bot spam
+    if is_message_from_bot(message):
         try:
             context.bot.delete_message(chat.id, message.message_id)
-        except:
+            context.bot.ban_chat_member(chat.id, user.id)
+        except Exception:
             pass
-        context.bot.ban_chat_member(chat.id, user.id)
-    
+        return
 
+    # Block links, buttons, mentions
+    if contains_forbidden_content(message):
+        try:
+            context.bot.delete_message(chat.id, message.message_id)
+            context.bot.ban_chat_member(chat.id, user.id)
+        except Exception:
+            pass
+        
 # ======================================================
 # UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
 # ======================================================
