@@ -770,37 +770,48 @@ def moderation_handler(update, context):
     if not message:
         return
 
-    user = message.from_user
     chat = update.effective_chat
+
+    # ✅ ALLOW messages sent as channel or group
+    if message.sender_chat:
+        return
+
+    user = message.from_user
     if not user or not chat:
         return
 
-    # Ignore bot messages
+    # ✅ Ignore bot messages
     if user.is_bot:
         return
 
-    # Allow owner
+    # ✅ Allow bot owner
     if user.id == BOT_OWNER_ID:
         return
 
-    # Allow admins
-    if is_group_admin(context.bot, chat.id, user.id):
+    # ✅ Allow bot admins (global admins)
+    if is_bot_admin(user.id):
         return
 
-    # Allow replies (VERY IMPORTANT)
-    if message.reply_to_message:
+    # ✅ Allow group/channel admins
+    if is_group_admin(context.bot, chat.id, user.id):
         return
 
     text = message.text or message.caption or ""
     if not text:
         return
 
-    # Block links (normal users only)
+    # ✅ Replies are allowed ONLY if clean
+    if message.reply_to_message:
+        if LINK_REGEX.search(text) or MENTION_REGEX.search(text):
+            handle_violation(update, context, "Links or mentions not allowed in replies")
+        return
+
+    # ❌ Block links (normal users)
     if LINK_REGEX.search(text):
         handle_violation(update, context, "Unauthorized link")
         return
 
-    # Block mentions (normal users only)
+    # ❌ Block @mentions (except allowed one)
     mentions = MENTION_REGEX.findall(text)
     for mention in mentions:
         if mention.lower() != ALLOWED_MENTION.lower():
