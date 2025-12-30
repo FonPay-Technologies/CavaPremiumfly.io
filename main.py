@@ -1197,7 +1197,6 @@ dp.add_handler(CommandHandler("autopin", start_autopin))
 dp.add_handler(CommandHandler("setpin", set_pin_button))
 dp.add_handler(MessageHandler(Filters.status_update.pinned_message, protect_pin), group=0)
 dp.add_handler(CommandHandler("scheduleunpin", schedule_unpin))
-dp.add_handler(CallbackQueryHandler(button_click, pattern="pin_click"))
 
 # ====================
 # 2️⃣ JOIN HANDLERS (EARLY)
