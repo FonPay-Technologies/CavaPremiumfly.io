@@ -817,13 +817,19 @@ def auto_pin_ads(context):
     job = context.job
     chat_id = job.context["chat_id"]
 
+    data = GROUP_PINS.get(chat_id, {
+        "text": "🚀 PREMIUM ACCESS AVAILABLE\n\nClick below to join:",
+        "link": "https://t.me/yourchannel"
+    })
+
     pin_with_button(
         context.bot,
         chat_id,
-        "🚀 PREMIUM ACCESS AVAILABLE\n\nClick below to join:",
+        data["text"],
         "VIEW CHANNEL",
-        "https://t.me/yourchannel"
+        data["link"]
     )
+
 
 def start_autopin(update, context):
     chat = update.effective_chat
