@@ -897,14 +897,8 @@ def schedule_unpin(update, context):
     )
     update.message.reply_text("⏰ Will unpin in 12 hours")
 
-def analytics_button():
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("VIEW CHANNEL", callback_data="pin_click")]
-    ])
-
 PIN_CLICKS = 0
 
-def button_click(update, context):
     global PIN_CLICKS
     PIN_CLICKS += 1
     update.callback_query.answer("🔥 Redirecting...")
