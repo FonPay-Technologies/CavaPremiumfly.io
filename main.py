@@ -6,6 +6,8 @@ from datetime import datetime
 from flask import Flask, render_template_string, request, jsonify
 import telegram  # <<< REQUIRED
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CommandHandler, CallbackQueryHandler
+from datetime import timedelta
 from telegram import Update, BotCommand
 from telegram.ext import (
     Updater,
@@ -114,6 +116,10 @@ def get_gift_link():
 def update_gift_link(link: str):
     with open(GIFT_FILE, "w") as f:
         f.write(link.strip())
+
+# -------------------- GLOBAL STORAGE --------------------
+GROUP_PINS = {}
+PIN_CLICKS = 0
 
 # -------------------- IN-MEM STORAGE --------------------
 ad_count = {}          # user_id -> verified ads count (0..TOTAL_ADS)
