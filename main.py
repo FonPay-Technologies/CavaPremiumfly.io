@@ -6,8 +6,9 @@ from datetime import datetime
 from flask import Flask, render_template_string, request, jsonify
 import telegram  # <<< REQUIRED
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CommandHandler, CallbackQueryHandler
+from telegram.ext import CommandHandler, CallbackQueryHandler, JobQueue
 from datetime import timedelta
+import time
 from telegram import Update, BotCommand
 from telegram.ext import (
     Updater,
