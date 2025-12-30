@@ -625,39 +625,50 @@ def pinpost_cmd(update, context):
     chat = update.effective_chat
     user = update.effective_user
 
-    # Only bot owner or group/channel admins
-    if user.id != BOT_OWNER_ID and not is_group_admin(context.bot, chat.id, user.id):
-        update.message.reply_text("❌ Admins only.")
+    # ✅ ALLOW CHANNELS
+    if chat.type == "channel":
+        allowed = True
+    else:
+        allowed = (
+            user and (
+                user.id == BOT_OWNER_ID or
+                is_group_admin(context.bot, chat.id, user.id)
+            )
+        )
+
+    if not allowed:
+        update.message.reply_text("❌ Admins only")
         return
 
     if len(context.args) < 2:
         update.message.reply_text(
             "Usage:\n"
-            "/pinpost <button_text> <link>\n\n"
+            "/pinpost <message_text> | <button_text> | <url>\n\n"
             "Example:\n"
-            "/pinpost VIEW_CHANNEL https://t.me/yourchannel"
+            "/pinpost Premium_Offer | Join_Now | https://t.me/yourchannel"
         )
         return
 
-    button_text = context.args[0].replace("_", " ")
-    link = context.args[1]
+    # 🧠 Parse message
+    raw = " ".join(context.args)
+    parts = [p.strip() for p in raw.split("|")]
 
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton(button_text, url=link)]
-    ])
+    if len(parts) != 3:
+        update.message.reply_text("❌ Format error. Use | to separate fields.")
+        return
 
-    msg = context.bot.send_message(
-        chat_id=chat.id,
-        text="📢 *Premium Access Available*\n\nClick below to view the channel.",
-        reply_markup=keyboard,
-        parse_mode="Markdown"
+    message_text = parts[0].replace("_", " ")
+    button_text = parts[1].replace("_", " ")
+    button_url = parts[2]
+
+    pin_with_button(
+        context.bot,
+        chat.id,
+        message_text,
+        button_text,
+        button_url
     )
 
-    context.bot.pin_chat_message(
-        chat_id=chat.id,
-        message_id=msg.message_id,
-        disable_notification=True
-    )
 
 def unpinpost_cmd(update, context):
     chat = update.effective_chat
