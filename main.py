@@ -384,7 +384,9 @@ def set_group_admin_commands(bot, chat_id):
         chat_id=chat_id
     )
 
-def set_owner_commands(bot, chat_id):
+from telegram.ext import BotCommandScopeAllPrivateChats
+
+def set_owner_commands(bot):
     bot.set_my_commands(
         [
             # Ads Watch
@@ -404,9 +406,11 @@ def set_owner_commands(bot, chat_id):
             BotCommand("setads", "Set ads"),
             BotCommand("getads", "Get ads"),
             BotCommand("set_monetag_zone", "Set Monetag zone"),
+
+            # 📌 PIN FEATURES (OWNER ONLY)
             BotCommand("sendpin", "Send & pin post to group/channel"),
 
-            # Moderation
+            # Moderation (owner override)
             BotCommand("mod_on", "Enable moderation"),
             BotCommand("mod_off", "Disable moderation"),
             BotCommand("warn", "Warn user"),
@@ -417,8 +421,7 @@ def set_owner_commands(bot, chat_id):
             BotCommand("banned", "Banned users"),
         ],
         scope=BotCommandScopeAllPrivateChats()
-        chat_id=chat_id
-                      )
+    )
 
 def start_cmd(update, context):
     user = update.effective_user
