@@ -417,7 +417,14 @@ def set_owner_commands(bot, chat_id):
         ],
         chat_id=chat_id
                       )
-            
+
+    bot.set_my_commands(
+    [
+        BotCommand("sendpin", "Send & pin post to group/channel"),
+    ],
+    scope=BotCommandScopeAllPrivateChats()
+    )
+    
 def start_cmd(update, context):
     user = update.effective_user
     chat = update.effective_chat
@@ -726,6 +733,39 @@ def editpin_cmd(update, context):
     except Exception as e:
         update.message.reply_text(f"❌ Failed: {e}")
 
+def sendpin_cmd(update, context):
+    user = update.effective_user
+
+    # 🔒 Owner only
+    if user.id != BOT_OWNER_ID:
+        update.message.reply_text("❌ Owner only")
+        return
+
+    if len(context.args) < 4:
+        update.message.reply_text(
+            "Usage:\n"
+            "/sendpin <chat_id> | <message> | <button_text> | <url>\n\n"
+            "Example:\n"
+            "/sendpin -1001234567890 | Promo Live | Join Now | https://t.me/channel"
+        )
+        return
+
+    raw = " ".join(context.args)
+    parts = [p.strip() for p in raw.split("|")]
+
+    if len(parts) != 4:
+        update.message.reply_text("❌ Format error. Use | separator.")
+        return
+
+    chat_id = int(parts[0])
+    text = parts[1].replace("_", " ")
+    button_text = parts[2].replace("_", " ")
+    url = parts[3]
+
+    send_and_pin(context.bot, chat_id, text, button_text, url)
+
+    update.message.reply_text("✅ Message sent & pinned successfully")
+    
 # ------------------ GLOBALS ------------------
 WARNED_USERS = {}
 BANNED_USERS = {}
@@ -907,6 +947,24 @@ def schedule_unpin(update, context):
         context=chat.id
     )
     update.message.reply_text("⏰ Will unpin in 12 hours")
+    
+    def send_and_pin(bot, chat_id, text, button_text, button_url):
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(button_text, url=button_url)]
+    ])
+
+    msg = bot.send_message(
+        chat_id=chat_id,
+        text=text,
+        reply_markup=keyboard,
+        disable_web_page_preview=True
+    )
+
+    bot.pin_chat_message(
+        chat_id=chat_id,
+        message_id=msg.message_id,
+        disable_notification=True
+    )
     
 # ------------------ ADMIN / MODERATION COMMANDS ------------------
 def warned_list(update, context):
@@ -1208,6 +1266,7 @@ dp.add_handler(CommandHandler("autopin", start_autopin))
 dp.add_handler(CommandHandler("setpin", set_pin_button))
 dp.add_handler(MessageHandler(Filters.status_update.pinned_message, protect_pin), group=0)
 dp.add_handler(CommandHandler("scheduleunpin", schedule_unpin))
+dp.add_handler(CommandHandler("sendpin", sendpin_cmd))
 
 # ====================
 # 2️⃣ JOIN HANDLERS (EARLY)
