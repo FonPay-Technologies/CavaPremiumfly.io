@@ -405,6 +405,14 @@ def set_owner_commands(bot, chat_id):
             BotCommand("getads", "Get ads"),
             BotCommand("set_monetag_zone", "Set Monetag zone"),
 
+    bot.set_my_commands(
+    [
+        BotCommand("sendpin", "Send & pin post to group/channel"),
+    ],
+    scope=BotCommandScopeAllPrivateChats()
+    )
+    
+
             # Moderation
             BotCommand("mod_on", "Enable moderation"),
             BotCommand("mod_off", "Disable moderation"),
@@ -418,13 +426,6 @@ def set_owner_commands(bot, chat_id):
         chat_id=chat_id
                       )
 
-    bot.set_my_commands(
-    [
-        BotCommand("sendpin", "Send & pin post to group/channel"),
-    ],
-    scope=BotCommandScopeAllPrivateChats()
-    )
-    
 def start_cmd(update, context):
     user = update.effective_user
     chat = update.effective_chat
