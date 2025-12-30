@@ -657,7 +657,63 @@ def pinpost_cmd(update, context):
         message_id=msg.message_id,
         disable_notification=True
     )
-    
+
+def unpinpost_cmd(update, context):
+    chat = update.effective_chat
+    user = update.effective_user
+
+    # Allow bot owner or admins
+    if user.id != BOT_OWNER_ID and not is_group_admin(context.bot, chat.id, user.id):
+        update.message.reply_text("❌ Admins only.")
+        return
+
+    try:
+        context.bot.unpin_chat_message(chat.id)
+        update.message.reply_text("✅ Pinned message removed.")
+    except Exception as e:
+        update.message.reply_text(f"❌ Failed: {e}")
+
+def editpin_cmd(update, context):
+    chat = update.effective_chat
+    user = update.effective_user
+
+    if user.id != BOT_OWNER_ID and not is_group_admin(context.bot, chat.id, user.id):
+        update.message.reply_text("❌ Admins only.")
+        return
+
+    if len(context.args) < 2:
+        update.message.reply_text(
+            "Usage:\n"
+            "/editpin <button_text> <link>"
+        )
+        return
+
+    button_text = context.args[0].replace("_", " ")
+    link = context.args[1]
+
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(button_text, url=link)]
+    ])
+
+    try:
+        pinned = context.bot.get_chat(chat.id).pinned_message
+        if not pinned:
+            update.message.reply_text("⚠️ No pinned message found.")
+            return
+
+        context.bot.edit_message_text(
+            chat_id=chat.id,
+            message_id=pinned.message_id,
+            text="📢 *Updated Announcement*\n\nClick below:",
+            reply_markup=keyboard,
+            parse_mode="Markdown"
+        )
+
+        update.message.reply_text("✅ Pinned message updated.")
+
+    except Exception as e:
+        update.message.reply_text(f"❌ Failed: {e}")
+
 # ------------------ GLOBALS ------------------
 WARNED_USERS = {}
 BANNED_USERS = {}
@@ -1032,6 +1088,8 @@ dp.add_handler(CommandHandler("mod_on", mod_on))
 dp.add_handler(CommandHandler("mod_off", mod_off))
 dp.add_handler(CommandHandler("unban", unban_cmd))
 dp.add_handler(CommandHandler("pinpost", pinpost_cmd))
+dp.add_handler(CommandHandler("unpinpost", unpinpost_cmd))
+dp.add_handler(CommandHandler("editpin", editpin_cmd))
 
 # ====================
 # 2️⃣ JOIN HANDLERS (EARLY)
