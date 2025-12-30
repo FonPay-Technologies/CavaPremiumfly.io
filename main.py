@@ -795,6 +795,54 @@ def handle_violation(update, context, reason):
             text=f"⛔ {user.first_name} has been banned.\nReason: Repeated violations."
         )
 
+def pin_with_button(bot, chat_id, text, button_text, button_url):
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(button_text, url=button_url)]
+    ])
+
+    msg = bot.send_message(
+        chat_id=chat_id,
+        text=text,
+        reply_markup=keyboard,
+        disable_web_page_preview=True
+    )
+
+    bot.pin_chat_message(
+        chat_id=chat_id,
+        message_id=msg.message_id,
+        disable_notification=True
+    )
+
+def auto_pin_ads(context):
+    job = context.job
+    chat_id = job.context["chat_id"]
+
+    pin_with_button(
+        context.bot,
+        chat_id,
+        "🚀 PREMIUM ACCESS AVAILABLE\n\nClick below to join:",
+        "VIEW CHANNEL",
+        "https://t.me/yourchannel"
+    )
+
+def start_autopin(update, context):
+    chat = update.effective_chat
+    user = update.effective_user
+
+    if user.id != BOT_OWNER_ID and not is_group_admin(context.bot, chat.id, user.id):
+        update.message.reply_text("❌ Admins only")
+        return
+
+    context.job_queue.run_repeating(
+        auto_pin_ads,
+        interval=timedelta(hours=6),
+        first=10,
+        context={"chat_id": chat.id},
+        name=str(chat.id)
+    )
+
+    update.message.reply_text("✅ Auto-pin started (every 6 hours)")
+
 # ------------------ ADMIN / MODERATION COMMANDS ------------------
 def warned_list(update, context):
     if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
@@ -1091,6 +1139,7 @@ dp.add_handler(CommandHandler("unban", unban_cmd))
 dp.add_handler(CommandHandler("pinpost", pinpost_cmd))
 dp.add_handler(CommandHandler("unpinpost", unpinpost_cmd))
 dp.add_handler(CommandHandler("editpin", editpin_cmd))
+dp.add_handler(CommandHandler("autopin", start_autopin))
 
 # ====================
 # 2️⃣ JOIN HANDLERS (EARLY)
