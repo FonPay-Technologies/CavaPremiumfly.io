@@ -948,7 +948,7 @@ def schedule_unpin(update, context):
     )
     update.message.reply_text("⏰ Will unpin in 12 hours")
     
-    def send_and_pin(bot, chat_id, text, button_text, button_url):
+def send_and_pin(bot, chat_id, text, button_text, button_url):
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(button_text, url=button_url)]
     ])
