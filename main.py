@@ -620,6 +620,44 @@ def set_monetag_zone_cmd(update, context):
     MONETAG_LINK = f"https://libtl.com/zone/{MONETAG_ZONE}"
     update.message.reply_text(f"✅ Monetag zone set to {MONETAG_ZONE}")     
 
+def pinpost_cmd(update, context):
+    chat = update.effective_chat
+    user = update.effective_user
+
+    # Only bot owner or group/channel admins
+    if user.id != BOT_OWNER_ID and not is_group_admin(context.bot, chat.id, user.id):
+        update.message.reply_text("❌ Admins only.")
+        return
+
+    if len(context.args) < 2:
+        update.message.reply_text(
+            "Usage:\n"
+            "/pinpost <button_text> <link>\n\n"
+            "Example:\n"
+            "/pinpost VIEW_CHANNEL https://t.me/yourchannel"
+        )
+        return
+
+    button_text = context.args[0].replace("_", " ")
+    link = context.args[1]
+
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(button_text, url=link)]
+    ])
+
+    msg = context.bot.send_message(
+        chat_id=chat.id,
+        text="📢 *Premium Access Available*\n\nClick below to view the channel.",
+        reply_markup=keyboard,
+        parse_mode="Markdown"
+    )
+
+    context.bot.pin_chat_message(
+        chat_id=chat.id,
+        message_id=msg.message_id,
+        disable_notification=True
+    )
+    
 # ------------------ GLOBALS ------------------
 WARNED_USERS = {}
 BANNED_USERS = {}
@@ -993,7 +1031,7 @@ dp.add_handler(CommandHandler("unwarn", unwarn))
 dp.add_handler(CommandHandler("mod_on", mod_on))
 dp.add_handler(CommandHandler("mod_off", mod_off))
 dp.add_handler(CommandHandler("unban", unban_cmd))
-
+dp.add_handler(CommandHandler("pinpost", pinpost_cmd))
 
 # ====================
 # 2️⃣ JOIN HANDLERS (EARLY)
