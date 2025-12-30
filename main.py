@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import Flask, render_template_string, request, jsonify
 import telegram  # <<< REQUIRED
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CommandHandler, CallbackQueryHandler, JobQueue
+from telegram.ext import CommandHandler, JobQueue
 from datetime import timedelta
 import time
 from telegram import Update, BotCommand
@@ -896,12 +896,6 @@ def schedule_unpin(update, context):
         context=chat.id
     )
     update.message.reply_text("⏰ Will unpin in 12 hours")
-
-PIN_CLICKS = 0
-
-    global PIN_CLICKS
-    PIN_CLICKS += 1
-    update.callback_query.answer("🔥 Redirecting...")
     
 # ------------------ ADMIN / MODERATION COMMANDS ------------------
 def warned_list(update, context):
