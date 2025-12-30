@@ -10,6 +10,11 @@ from telegram.ext import CommandHandler, JobQueue
 from datetime import timedelta
 import time
 from telegram import Update, BotCommand
+from telegram import (
+    BotCommand,
+    BotCommandScopeAllPrivateChats,
+)
+
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -384,7 +389,7 @@ def set_group_admin_commands(bot, chat_id):
         chat_id=chat_id
     )
 
-from telegram.ext import BotCommandScopeAllPrivateChats
+from telegram import BotCommandScopeAllPrivateChats
 
 def set_owner_commands(bot):
     bot.set_my_commands(
