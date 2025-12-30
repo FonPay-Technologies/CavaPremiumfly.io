@@ -843,6 +843,66 @@ def start_autopin(update, context):
 
     update.message.reply_text("✅ Auto-pin started (every 6 hours)")
 
+def set_pin_button(update, context):
+    chat = update.effective_chat
+    user = update.effective_user
+
+    if user.id != BOT_OWNER_ID and not is_group_admin(context.bot, chat.id, user.id):
+        return
+
+    if len(context.args) < 2:
+        update.message.reply_text("/setpin <text> <link>")
+        return
+
+    GROUP_PINS[chat.id] = {
+        "text": context.args[0].replace("_", " "),
+        "link": context.args[1]
+    }
+
+    update.message.reply_text("✅ Pin button saved")
+
+def protect_pin(update, context):
+    msg = update.effective_message
+    chat = update.effective_chat
+
+    if msg and msg.pinned_message:
+        user = msg.from_user
+
+        if user and not is_group_admin(context.bot, chat.id, user.id):
+            try:
+                context.bot.pin_chat_message(
+                    chat.id,
+                    msg.pinned_message.message_id,
+                    disable_notification=True
+                )
+            except:
+                pass
+
+def scheduled_unpin(context):
+    chat_id = context.job.context
+    context.bot.unpin_chat_message(chat_id)
+
+def schedule_unpin(update, context):
+    chat = update.effective_chat
+    context.job_queue.run_once(
+        scheduled_unpin,
+        when=timedelta(hours=12),
+        context=chat.id
+    )
+    update.message.reply_text("⏰ Will unpin in 12 hours")
+
+def analytics_button():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("VIEW CHANNEL", callback_data="pin_click")]
+    ])
+
+PIN_CLICKS = 0
+
+def button_click(update, context):
+    global PIN_CLICKS
+    PIN_CLICKS += 1
+    update.callback_query.answer("🔥 Redirecting...")
+    
 # ------------------ ADMIN / MODERATION COMMANDS ------------------
 def warned_list(update, context):
     if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
@@ -1140,6 +1200,10 @@ dp.add_handler(CommandHandler("pinpost", pinpost_cmd))
 dp.add_handler(CommandHandler("unpinpost", unpinpost_cmd))
 dp.add_handler(CommandHandler("editpin", editpin_cmd))
 dp.add_handler(CommandHandler("autopin", start_autopin))
+dp.add_handler(CommandHandler("setpin", set_pin_button))
+dp.add_handler(MessageHandler(Filters.status_update.pinned_message, protect_pin), group=0)
+dp.add_handler(CommandHandler("scheduleunpin", schedule_unpin))
+dp.add_handler(CallbackQueryHandler(button_click, pattern="pin_click"))
 
 # ====================
 # 2️⃣ JOIN HANDLERS (EARLY)
