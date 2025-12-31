@@ -1117,20 +1117,21 @@ def moderation_handler(update, context):
         return
 
     text = (message.text or message.caption or "").lower()
-    if not text:
+if not text:
+    return
+
+# 🔒 LINK BLOCKING (NORMAL USERS ONLY)
+if LINK_REGEX.search(text):
+    # allow bot owner
+    if is_bot_owner(user.id):
         return
 
-    # ✅ Replies are allowed ONLY if clean
-    if message.reply_to_message:
-    if LINK_REGEX.search(text):
-  
-    # allow admins / owner
-    if is_group_admin(context.bot, chat.id, user.id) or is_bot_owner(user.id):
+    # allow group/channel admins
+    if is_group_admin(context.bot, chat.id, user.id):
         return
 
     handle_violation(update, context, "Unauthorized link detected")
     return
-
 
     # ❌ Block links (normal users)
     if LINK_REGEX.search(text):
