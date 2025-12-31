@@ -436,7 +436,7 @@ def start_cmd(update, context):
     # ==========================
     # ROLE-BASED "/" COMMAND MENU
     # ==========================
-    if user.id == BOT_OWNER_ID:
+    if is_bot_owner(user.id):
         set_owner_commands(bot, chat.id)
 
     elif chat.type in ("group", "supergroup", "channel") and \
