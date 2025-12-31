@@ -1123,6 +1123,7 @@ def moderation_handler(update, context):
     # ✅ Replies are allowed ONLY if clean
     if message.reply_to_message:
     if LINK_REGEX.search(text):
+  
     # allow admins / owner
     if is_group_admin(context.bot, chat.id, user.id) or is_bot_owner(user.id):
         return
