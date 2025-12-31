@@ -1117,8 +1117,8 @@ def moderation_handler(update, context):
         return
 
     text = (message.text or message.caption or "").lower()
-if not text:
-    return
+    if not text:
+        return
 
 # 🔒 LINK BLOCKING (NORMAL USERS ONLY)
 if LINK_REGEX.search(text):
