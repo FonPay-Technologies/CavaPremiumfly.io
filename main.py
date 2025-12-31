@@ -31,6 +31,20 @@ from telegram.ext import (
     ChatMemberHandler  # If you use join detection
 )
 import re
+
+LINK_REGEX = re.compile(
+    r"""
+    (
+        (https?:\/\/)?                # http or https (optional)
+        (www\.)?                      # www (optional)
+        [a-zA-Z0-9-]+\.[a-zA-Z]{2,}   # domain.tld
+        (\/\S*)?                     # optional path
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE
+)
+
+import re
 from telegram.error import BadRequest
 
 # -------------------- CONFIG --------------------
