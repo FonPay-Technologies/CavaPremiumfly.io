@@ -1105,7 +1105,7 @@ def moderation_handler(update, context):
         return
 
     # ✅ Allow bot owner
-    if user.id == BOT_OWNER_ID:
+    if is_bot_owner(user.id):
         return
 
     # ✅ Allow bot admins (global admins)
@@ -1155,7 +1155,7 @@ def strict_group_moderation(update, context):
         return
 
     # ✅ Allow bot owner
-    if user.id == BOT_OWNER_ID:
+    if is_bot_owner(user.id):
         return
 
     # ✅ Allow bot admins
