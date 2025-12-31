@@ -739,39 +739,6 @@ def editpin_cmd(update, context):
 def sendpin_cmd(update, context):
     user = update.effective_user
 
-    # 🔒 Owner only
-    if not is_bot_owner(user.id):
-        update.message.reply_text("❌ Owner only")
-        return
-
-    if len(context.args) < 4:
-        update.message.reply_text(
-            "Usage:\n"
-            "/sendpin <chat_id> | <message> | <button_text> | <url>\n\n"
-            "Example:\n"
-            "/sendpin -1001234567890 | Promo Live | Join Now | https://t.me/channel"
-        )
-        return
-
-    raw = " ".join(context.args)
-    parts = [p.strip() for p in raw.split("|")]
-
-    if len(parts) != 4:
-        update.message.reply_text("❌ Format error. Use | separator.")
-        return
-
-    chat_id = int(parts[0])
-    text = parts[1].replace("_", " ")
-    button_text = parts[2].replace("_", " ")
-    url = parts[3]
-
-    send_and_pin(context.bot, chat_id, text, button_text, url)
-
-    update.message.reply_text("✅ Message sent & pinned successfully")
-
-def sendpin_cmd(update, context):
-    user = update.effective_user
-
     # OWNER CHECK
     if not is_bot_owner(user.id):
         update.message.reply_text("❌ Owner only")
