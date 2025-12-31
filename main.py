@@ -1123,20 +1123,20 @@ def moderation_handler(update, context):
 # 🔒 LINK BLOCKING (NORMAL USERS ONLY)
 if LINK_REGEX.search(text):
     # allow bot owner
-    if is_bot_owner(user.id):
-        return
+        if is_bot_owner(user.id):
+            return
 
     # allow group/channel admins
-    if is_group_admin(context.bot, chat.id, user.id):
-        return
+        if is_group_admin(context.bot, chat.id, user.id):
+            return
 
     handle_violation(update, context, "Unauthorized link detected")
-    return
+            return
 
     # ❌ Block links (normal users)
     if LINK_REGEX.search(text):
         handle_violation(update, context, "Unauthorized link")
-        return
+            return
 
     # ❌ Block @mentions (except allowed one)
     mentions = MENTION_REGEX.findall(text)
