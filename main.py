@@ -56,8 +56,12 @@ MODE_FILE = "mode.txt"      # monetag|promo
 PROMO_FILE = "promo.txt"
 GIFT_FILE = "gift.txt"
 
-# ===== BOT OWNER =====
-BOT_OWNER_ID = 5236441213,5725566044  # your Telegram ID
+# ------------------ OWNERS ------------------
+
+BOT_OWNER_IDS = {5236441213, 5725566044}
+
+def is_bot_owner(user_id):
+    return int(user_id) in BOT_OWNER_IDS
 
 # ===== MODERATION TOGGLE =====
 MODERATION_ENABLED = {}
