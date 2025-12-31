@@ -741,8 +741,8 @@ def sendpin_cmd(update, context):
 
     # 🔒 Owner only
     if not is_bot_owner(user.id):
-    update.message.reply_text("❌ Owner only")
-    return
+        update.message.reply_text("❌ Owner only")
+        return
 
     if len(context.args) < 4:
         update.message.reply_text(
