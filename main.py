@@ -1007,7 +1007,16 @@ def send_and_pin(bot, chat_id, text, button_text, button_url):
         message_id=msg.message_id,
         disable_notification=True
     )
-    
+
+def is_message_from_bot(message):
+    """
+    Returns True if message was sent by a bot account
+    """
+    try:
+        return message.from_user and message.from_user.is_bot
+    except:
+        return False
+
 # ------------------ ADMIN / MODERATION COMMANDS ------------------
 def warned_list(update, context):
     if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
