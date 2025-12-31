@@ -1122,9 +1122,14 @@ def moderation_handler(update, context):
 
     # ✅ Replies are allowed ONLY if clean
     if message.reply_to_message:
-        if LINK_REGEX.search(text) or MENTION_REGEX.search(text):
-            handle_violation(update, context, "Links or mentions not allowed in replies")
+    if LINK_REGEX.search(text):
+    # allow admins / owner
+    if is_group_admin(context.bot, chat.id, user.id) or is_bot_owner(user.id):
         return
+
+    handle_violation(update, context, "Unauthorized link detected")
+    return
+
 
     # ❌ Block links (normal users)
     if LINK_REGEX.search(text):
