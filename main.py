@@ -768,7 +768,67 @@ def sendpin_cmd(update, context):
     send_and_pin(context.bot, chat_id, text, button_text, url)
 
     update.message.reply_text("✅ Message sent & pinned successfully")
-    
+
+def sendpin_cmd(update, context):
+    user = update.effective_user
+
+    # OWNER CHECK
+    if not is_bot_owner(user.id):
+        update.message.reply_text("❌ Owner only")
+        return
+
+    raw = update.message.text
+
+    # Expected format:
+    # /sendpin chat_id | text | button_text | url
+    if "|" not in raw:
+        update.message.reply_text(
+            "❌ Format:\n"
+            "/sendpin chat_id | text | button_text | url"
+        )
+        return
+
+    try:
+        _, payload = raw.split(" ", 1)
+        parts = [p.strip() for p in payload.split("|", 3)]
+
+        if len(parts) != 4:
+            raise ValueError("Invalid parts")
+
+        chat_id = int(parts[0])
+        text = parts[1]
+        button_text = parts[2]
+        button_url = parts[3]
+
+    except Exception as e:
+        update.message.reply_text(f"❌ Parsing error: {e}")
+        return
+
+    # SEND MESSAGE WITH BUTTON
+    try:
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(button_text, url=button_url)]
+        ])
+
+        msg = context.bot.send_message(
+            chat_id=chat_id,
+            text=text,
+            reply_markup=keyboard,
+            disable_web_page_preview=True
+        )
+
+        # PIN MESSAGE
+        context.bot.pin_chat_message(
+            chat_id=chat_id,
+            message_id=msg.message_id,
+            disable_notification=True
+        )
+
+        update.message.reply_text("✅ Post sent and pinned successfully")
+
+    except Exception as e:
+        update.message.reply_text(f"❌ Telegram error:\n{e}")
+
 # ------------------ GLOBALS ------------------
 WARNED_USERS = {}
 BANNED_USERS = {}
