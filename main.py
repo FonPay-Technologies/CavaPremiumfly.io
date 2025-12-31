@@ -1116,7 +1116,7 @@ def moderation_handler(update, context):
     if is_group_admin(context.bot, chat.id, user.id):
         return
 
-    text = message.text or message.caption or ""
+    text = (message.text or message.caption or "").lower()
     if not text:
         return
 
