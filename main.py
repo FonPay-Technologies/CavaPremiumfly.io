@@ -1054,7 +1054,45 @@ def contains_forbidden_content(message):
         return True
 
     return False
-    
+
+def contains_forbidden_content(message):
+    """
+    Detects links, disguised links, mentions, and buttons
+    """
+    text = (message.text or message.caption or "").lower()
+
+    if not text:
+        return False
+
+    # 🔒 Detect normal links
+    if LINK_REGEX.search(text):
+        return True
+
+    # 🔒 Detect spaced / disguised links (f a c e b o o k . c o m)
+    spaced = re.sub(r"\s+", "", text)
+    if LINK_REGEX.search(spaced):
+        return True
+
+    # 🔒 Detect obfuscated links like fb[.]com
+    obfuscated = text.replace("[.]", ".").replace("(.)", ".")
+    if LINK_REGEX.search(obfuscated):
+        return True
+
+    # 🔒 Detect zero-width space links
+    zero_width = text.replace("\u200b", "")
+    if LINK_REGEX.search(zero_width):
+        return True
+
+    # 🔒 Detect mentions
+    if MENTION_REGEX.search(text):
+        return True
+
+    # 🔒 Detect inline buttons
+    if message.reply_markup:
+        return True
+
+    return False
+
 # ------------------ ADMIN / MODERATION COMMANDS ------------------
 def warned_list(update, context):
     if not is_group_admin(context.bot, update.effective_chat.id, update.effective_user.id):
