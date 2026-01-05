@@ -1214,8 +1214,13 @@ def moderation_handler(update, context):
 # ------------------ STRICT MODERATION ------------------
 def strict_group_moderation(update, context):
     message = update.effective_message
-    if not message:
+    if not message or not message.text:
         return
+
+    text = message.text.lower()
+
+    # DEBUG — THIS WILL CONFIRM EXECUTION
+    print("MODERATION CHECK:", text)
 
     chat = update.effective_chat
     if not chat:
