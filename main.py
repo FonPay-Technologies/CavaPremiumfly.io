@@ -1018,7 +1018,7 @@ def is_message_from_bot(message):
     except:
         return False
 
-    def contains_forbidden_content(message):
+def contains_forbidden_content(message):
 
     text = (
         message.text
