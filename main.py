@@ -790,7 +790,7 @@ def sendpin_cmd(update, context):
         ])
 
         msg = context.bot.send_message(
-    chat_id=target_chat,
+    chat_id=chat_id,
     text=text,
     reply_markup=keyboard,
     parse_mode="HTML",
