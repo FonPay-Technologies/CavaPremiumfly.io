@@ -1060,8 +1060,7 @@ def contains_forbidden_content(message):
     if message.entities:
     for entity in message.entities:
         if entity.type in ["text_link", "url"]:
-            return True
-            
+            return True       
     return False
 
     # 🔒 Detect normal links
