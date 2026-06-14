@@ -898,8 +898,7 @@ def pin_with_button(bot, chat_id, text, button_text, button_url):
         chat_id=chat_id,
         text=text,
         reply_markup=keyboard,
-    parse_mode="HTML",
-    disable_web_page_preview=False
+    parse_mode="HTML"
     )
 
     bot.pin_chat_message(
