@@ -1018,13 +1018,51 @@ def is_message_from_bot(message):
         return False
 
 def contains_forbidden_content(message):
-    """
-    Detects links, disguised links, mentions, and buttons
-    """
-    text = (message.text or message.caption or "").lower()
+
+    text = (
+        message.text
+        or message.caption
+        or ""
+    )
 
     if not text:
         return False
+
+    text = text.lower()
+
+    # Normal links
+    if LINK_REGEX.search(text):
+        return True
+
+    # Remove spaces
+    compact = re.sub(r"\s+", "", text)
+
+    if LINK_REGEX.search(compact):
+        return True
+
+    # fb[.]com
+    compact = compact.replace("[.]", ".")
+    compact = compact.replace("(.)", ".")
+
+    if LINK_REGEX.search(compact):
+        return True
+
+    # Zero-width spaces
+    compact = compact.replace("\u200b", "")
+
+    if LINK_REGEX.search(compact):
+        return True
+
+    # @mentions
+    if MENTION_REGEX.search(text):
+        return True
+
+    if message.entities:
+    for entity in message.entities:
+        if entity.type in ["text_link", "url"]:
+            return True
+            
+    return False
 
     # 🔒 Detect normal links
     if LINK_REGEX.search(text):
