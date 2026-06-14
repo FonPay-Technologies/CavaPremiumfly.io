@@ -1018,7 +1018,7 @@ def is_message_from_bot(message):
     except:
         return False
 
-def contains_forbidden_content(message):
+    def contains_forbidden_content(message):
 
     text = (
         message.text
@@ -1058,10 +1058,6 @@ def contains_forbidden_content(message):
     if MENTION_REGEX.search(text):
         return True
 
-    if message.entities:
-    for entity in message.entities:
-        if entity.type in ["text_link", "url"]:
-            return True       
     return False
 
     # 🔒 Detect normal links
