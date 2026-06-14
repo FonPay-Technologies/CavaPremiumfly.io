@@ -1233,6 +1233,19 @@ def moderation_handler(update, context):
     if not text:
         return
 
+    # Detect Telegram hidden links
+if message.entities:
+    for entity in message.entities:
+        if entity.type in ["url", "text_link"]:
+            handle_violation(update, context, "Hidden link detected")
+            return
+
+if message.caption_entities:
+    for entity in message.caption_entities:
+        if entity.type in ["url", "text_link"]:
+            handle_violation(update, context, "Hidden link detected")
+            return
+
     # 🔒 LINK BLOCKING (NORMAL USERS ONLY)
     if LINK_REGEX.search(text):
         handle_violation(update, context, "Unauthorized link detected")
