@@ -1366,15 +1366,10 @@ def handle_join_events(update, context):
                 return
             welcomed.add(key)
 
-            BOT_LINK = "https://t.me/CanvaPro4all_bot?startapp"
-            keyboard = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("🎁 Get Canva Premium Access", url=BOT_LINK)]]
-            )
-
             msg.reply_text(
-                f"🎉 Welcome {user.first_name}!\nTap below to claim Canva Premium Access 👇",
-                reply_markup=keyboard
-            )
+    f"👋 Welcome, {user.first_name}!\n\n"
+    "Please read and follow the group rules. Our anti-spam system is active to help keep this community safe."
+)
         return
 
     # 2️⃣ CHANNEL JOIN EVENTS
