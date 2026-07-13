@@ -1349,8 +1349,9 @@ def handle_join_events(update, context):
             if user.id == bot_id:
                 try:
                     msg.reply_text(
-                        "🔥 Thanks for adding me!\n"
-                        "I will welcome new members with a Canva Premium button 🎁"
+    "🤖 Thank you for adding me!\n\n"
+    "Anti-Spam Protection has been activated.\n\n"
+    "I'll help keep this group safe by detecting and taking action against spam, unauthorized links, mentions, bots, and other prohibited content."
                     )
                 except: pass
                 return
