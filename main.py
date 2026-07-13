@@ -43,7 +43,7 @@ from telegram.error import BadRequest
 
 # -------------------- CONFIG --------------------
 # You provided these values
-TOKEN = os.environ.get("TOKEN") or "8325305060:AAE-3O0SiP0hJZMhoiGLoC1qOG-gQ_zSNmk"
+TOKEN = os.environ["TOKEN"]
 # Admin IDs (multiple allowed)
 ADMIN_IDS = set(int(x.strip()) for x in os.environ.get("ADMIN_IDS", "5236441213,5725566044").split(","))
 PREMIUM_APPS_LINK = os.environ.get("PREMIUM_APPS_LINK", "https://t.me/gsf8mqOl0atkMTM0")
