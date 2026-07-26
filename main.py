@@ -1580,7 +1580,16 @@ else:
     try:
         # Remove any previously set webhook and set the new one
         bot.delete_webhook()
-        bot.set_webhook(url=webhook_url)
+        bot.delete_webhook()
+
+bot.set_webhook(
+    url=webhook_url,
+    allowed_updates=[
+        "message",
+        "my_chat_member",
+        "chat_member"
+    ]
+)
         logger.info("✅ Webhook set to: %s", webhook_url)
     except Exception as e:
         logger.exception("Failed to set webhook: %s", e)
