@@ -1415,22 +1415,22 @@ Thank you for joining <b>{chat.title}</b>.
 
 <b>📜 Community Rules</b>
 
-✅ Respect every member.
-✅ No spam or repeated messages.
-✅ No unauthorized links or advertisements.
-✅ No promoting other groups or channels.
-✅ No scams, phishing, or misleading content.
-✅ No offensive or abusive language.
-✅ Follow the instructions of admins and moderators.
+\u2705 Respect every member.
+\u2705 No spam or repeated messages.
+\u2705 No unauthorized links or advertisements.
+\u2705 No promoting other groups or channels.
+\u2705 No scams, phishing, or misleading content.
+\u2705 No offensive or abusive language.
+\u2705 Follow the instructions of admins and moderators.
 
-⚠️ <b>Anti-Spam Protection is Active</b>
+\u26A0\uFE0F <b> \U0001F6E1\uFE0F Anti-Spam Protection is Active</b>
 
 This community is protected by an automated moderation bot.
 
 Violations may result in:
-• ⚠️ Warning
-• 🔇 Temporary Mute
-• ⛔ Permanent Ban
+• \u26A0\uFE0F Warning
+• \U0001F507 Temporary Mute
+• \u26D4 Permanent Ban
 
 Thank you for helping keep this community safe! 🎉
 """,
@@ -1456,7 +1456,7 @@ Thank you for helping keep this community safe! 🎉
             try:
                 context.bot.send_message(
                     chat_id=chat.id,
-                    text="""🛡️ Anti-Spam Protection activated successfully.
+                    text="""\U0001F6E1\uFE0F Anti-Spam Protection activated successfully.
 
 Thank you for adding me.
 
