@@ -1563,34 +1563,35 @@ updater.dispatcher.add_error_handler(error_handler)
 # ------------------------------
 # Webhook configuration for Render
 # ------------------------------
-# Expose bot + updater to the Flask webhook route already defined above
 app.config["bot_bot"] = bot
 app.config["bot_updater"] = updater
 
-# Build webhook URL from environment (Render provides HTTPS domain)
 WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
+
 if not WEB_URL:
     logger.error("RENDER_EXTERNAL_URL is not set. Webhook won't be configured.")
 else:
     webhook_url = f"{WEB_URL.rstrip('/')}/webhook"
+
     try:
-        # Remove any previously set webhook and set the new one
-        bot.delete_webhook()
+        # Remove old webhook
         bot.delete_webhook()
 
-bot.set_webhook(
-    url=webhook_url,
-    allowed_updates=[
-        "message",
-        "my_chat_member",
-        "chat_member"
-    ]
-)
-        logger.info("✅ Webhook set to: %s", webhook_url)
+        # Register new webhook
+        bot.set_webhook(
+            url=webhook_url,
+            allowed_updates=[
+                "message",
+                "my_chat_member",
+                "chat_member"
+            ]
+        )
+
+        logger.info("Webhook set to: %s", webhook_url)
+
     except Exception as e:
         logger.exception("Failed to set webhook: %s", e)
-
-
+        
 # ==============================
 # REGISTER / COMMAND MENUS HERE
 # ==============================
