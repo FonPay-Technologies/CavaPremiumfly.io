@@ -1349,9 +1349,23 @@ def handle_join_events(update, context):
             if user.id == bot_id:
                 try:
                     msg.reply_text(
-    "🤖 Thank you for adding me!\n\n"
-    "Anti-Spam Protection has been activated.\n\n"
-    "I'll help keep this group safe by detecting and taking action against spam, unauthorized links, mentions, bots, and other prohibited content."
+    """🛡️ <b>Thank you for adding me!</b>
+
+Anti-Spam Protection has been activated successfully.
+
+I can automatically:
+✅ Detect spam
+✅ Block unauthorized links
+✅ Block unwanted @mentions
+✅ Warn offenders
+✅ Mute repeat offenders
+✅ Ban persistent spammers
+
+Type /help to view all available commands and configure moderation.
+
+Let's keep this community clean and secure! 🚀
+""",
+    parse_mode="HTML"
                     )
                 except: pass
                 return
@@ -1366,9 +1380,44 @@ def handle_join_events(update, context):
                 return
             welcomed.add(key)
 
-            msg.reply_text(
-    f"👋 Welcome, {user.first_name}!\n\n"
-    "Please read and follow the group rules. Our anti-spam system is active to help keep this community safe."
+            keyboard = InlineKeyboardMarkup([
+    [
+        InlineKeyboardButton(
+            "➕ Add This Bot to Your Group",
+            url="https://t.me/CanvaPro4all_bot?startgroup=true"
+        )
+    ]
+])
+
+msg.reply_text(
+    f"""🛡️ <b>Welcome, {user.first_name}!</b>
+
+Thank you for joining <b>{chat.title}</b>.
+
+<b>📜 Community Rules</b>
+
+✅ Respect every member.
+✅ No spam or repeated messages.
+✅ No unauthorized links or advertisements.
+✅ No promoting other groups or channels.
+✅ No scams, phishing, or misleading content.
+✅ No offensive or abusive language.
+✅ Follow the instructions of admins and moderators.
+
+⚠️ <b>Anti-Spam Protection is Active</b>
+
+This community is protected by an automated moderation bot.
+
+Violations may result in:
+• ⚠️ Warning
+• 🔇 Temporary Mute
+• ⛔ Permanent Ban
+
+Thank you for helping keep this community safe! 🎉
+""",
+    parse_mode="HTML",
+    reply_markup=keyboard,
+    disable_web_page_preview=True
 )
         return
 
