@@ -1370,12 +1370,12 @@ def handle_join_events(update, context):
 Anti-Spam Protection has been activated successfully.
 
 I can automatically:
-✓ Detect spam
-✅ Block unauthorized links
-✅ Block unwanted @mentions
-✅ Warn offenders
-✅ Mute repeat offenders
-✅ Ban persistent spammers
+ Detect spam
+ Block unauthorized links
+ Block unwanted @mentions
+ Warn offenders
+ Mute repeat offenders
+ Ban persistent spammers
 
 Type /help to view all available commands and configure moderation.
 
