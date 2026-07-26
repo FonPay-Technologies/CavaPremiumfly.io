@@ -1365,7 +1365,7 @@ def handle_join_events(update, context):
             if user.id == bot_id:
                 try:
                     msg.reply_text(
-                        """🛡️ <b>Thank you for adding me!</b>
+                        """ <b>Thank you for adding me!</b>
 
 Anti-Spam Protection has been activated successfully.
 
