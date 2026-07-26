@@ -1329,6 +1329,20 @@ def handle_join_events(update, context):
        - group joins
        - channel joins
        - user added manually
+
+# ======================================================
+# UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
+# ======================================================
+
+from telegram import ChatMemberUpdated
+
+welcomed = set()
+
+def handle_join_events(update, context):
+    """Handles ALL join events:
+       - group joins
+       - channel joins
+       - user added manually
        - user joins via link
        - bot added to group/channel
        - admin promoted/demoted
@@ -1341,15 +1355,17 @@ def handle_join_events(update, context):
     chat = update.effective_chat
     bot_id = context.bot.id
 
-    # 1️⃣ GROUP JOIN EVENTS (new_chat_members)
+    # ==================================================
+    # GROUP JOIN EVENTS
+    # ==================================================
     if msg and msg.new_chat_members:
         for user in msg.new_chat_members:
 
-            # Bot added
+            # Bot added to group
             if user.id == bot_id:
                 try:
                     msg.reply_text(
-    """🛡️ <b>Thank you for adding me!</b>
+                        """🛡️ <b>Thank you for adding me!</b>
 
 Anti-Spam Protection has been activated successfully.
 
@@ -1365,32 +1381,35 @@ Type /help to view all available commands and configure moderation.
 
 Let's keep this community clean and secure! 🚀
 """,
-    parse_mode="HTML"
+                        parse_mode="HTML"
                     )
-                except: pass
+                except Exception:
+                    pass
+
                 return
 
             # Ignore other bots
             if user.is_bot:
-                return
+                continue
 
-            # Unique welcome check
+            # Prevent duplicate welcome
             key = (chat.id, user.id)
             if key in welcomed:
-                return
+                continue
+
             welcomed.add(key)
 
             keyboard = InlineKeyboardMarkup([
-    [
-        InlineKeyboardButton(
-            "➕ Add This Bot to Your Group",
-            url="https://t.me/CanvaPro4all_bot?startgroup=true"
-        )
-    ]
-])
+                [
+                    InlineKeyboardButton(
+                        "➕ Add This Bot to Your Group",
+                        url="https://t.me/CanvaPro4all_bot?startgroup=true"
+                    )
+                ]
+            ])
 
-msg.reply_text(
-    f"""🛡️ <b>Welcome, {user.first_name}!</b>
+            msg.reply_text(
+                f"""🛡️ <b>Welcome, {user.first_name}!</b>
 
 Thank you for joining <b>{chat.title}</b>.
 
@@ -1415,28 +1434,39 @@ Violations may result in:
 
 Thank you for helping keep this community safe! 🎉
 """,
-    parse_mode="HTML",
-    reply_markup=keyboard,
-    disable_web_page_preview=True
-)
+                parse_mode="HTML",
+                reply_markup=keyboard,
+                disable_web_page_preview=True
+            )
+
         return
 
-    # 2️⃣ CHANNEL JOIN EVENTS
+    # ==================================================
+    # CHANNEL JOIN EVENTS
+    # ==================================================
     if isinstance(update.my_chat_member, ChatMemberUpdated):
         c = update.my_chat_member
 
-        old = c.old_chat_member.status
         new = c.new_chat_member.status
 
-        # Bot added to CHANNEL
-        if new in ["member", "administrator"] and c.new_chat_member.user.id == bot_id:
+        if (
+            new in ("member", "administrator")
+            and c.new_chat_member.user.id == bot_id
+        ):
             try:
                 context.bot.send_message(
                     chat_id=chat.id,
-                    text="🔥 Bot added to channel! I will send join-welcome messages."
+                    text="""🛡️ Anti-Spam Protection activated successfully.
+
+Thank you for adding me.
+
+Use /help to view available moderation commands and configure the bot.
+"""
                 )
-            except: pass
-            return
+            except Exception:
+                pass
+
+        return
 
    # --------------------------------------------
 # FINAL STARTER (Required for Render)
