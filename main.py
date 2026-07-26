@@ -1387,7 +1387,7 @@ Type /help to view all available commands and configure moderation.
             keyboard = InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
-                        "➕ Add This Bot to Your Group",
+                        " Add This Bot to Your Group",
                         url="https://t.me/CanvaPro4all_bot?startgroup=true"
                     )
                 ]
@@ -1398,7 +1398,7 @@ Type /help to view all available commands and configure moderation.
 
 Thank you for joining <b>{chat.title}</b>.
 
-<b>📜 Community Rules</b>
+<b> Community Rules</b>
 
 \u2705 Respect every member.
 \u2705 No spam or repeated messages.
