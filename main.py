@@ -1321,21 +1321,14 @@ def strict_group_moderation(update, context):
 # ======================================================
 
 from telegram import ChatMemberUpdated
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 welcomed = set()
 
 def handle_join_events(update, context):
-    """Handles ALL join events:
-       - group joins
-       - channel joins
-       - user added manually
-       - user joins via link
-       - bot added to group/channel
-       - admin promoted/demoted
-    """
+    """Handles group joins, channel joins and bot-added events."""
 
-    upd = update.to_dict()
-    print("\nJOIN EVENT:", upd, "\n")
+    print("\nJOIN EVENT:", update.to_dict(), "\n")
 
     msg = update.message
     chat = update.effective_chat
@@ -1345,35 +1338,32 @@ def handle_join_events(update, context):
     # GROUP JOIN EVENTS
     # ==================================================
     if msg and msg.new_chat_members:
+
         for user in msg.new_chat_members:
 
             # Bot added to group
             if user.id == bot_id:
-    try:
-        msg.reply_text(
-            """<b>Thank you for adding me!</b>
+                try:
+                    msg.reply_text(
+                        "<b>Thank you for adding me!</b>\n\n"
+                        "Anti-Spam Protection has been activated successfully.\n\n"
+                        "I can automatically:\n"
+                        "- Detect spam\n"
+                        "- Block unauthorized links\n"
+                        "- Block unwanted @mentions\n"
+                        "- Warn offenders\n"
+                        "- Mute repeat offenders\n"
+                        "- Ban persistent spammers\n\n"
+                        "Type /help to view all available commands.\n\n"
+                        "Let's keep this community clean and secure!",
+                        parse_mode="HTML"
+                    )
+                except Exception:
+                    pass
 
-Anti-Spam Protection has been activated successfully.
+                return
 
-I can automatically:
-• Detect spam
-• Block unauthorized links
-• Block unwanted @mentions
-• Warn offenders
-• Mute repeat offenders
-• Ban persistent spammers
-
-Type /help to view all available commands and configure moderation.
-
-Let's keep this community clean and secure!
-""",
-            parse_mode="HTML"
-        )
-    except Exception:
-        pass
-
-    return
-            # Ignore other bots
+            # Ignore bots
             if user.is_bot:
                 continue
 
@@ -1384,45 +1374,66 @@ Let's keep this community clean and secure!
 
             welcomed.add(key)
 
-            keyboard = InlineKeyboardMarkup([
-                [
+            keyboard = InlineKeyboardMarkup(
+                [[
                     InlineKeyboardButton(
-                        " Add This Bot to Your Group",
+                        "Add This Bot to Your Group",
                         url="https://t.me/CanvaPro4all_bot?startgroup=true"
                     )
-                ]
-            ])
-
-            msg.reply_text(
-                f"""<b>Welcome, {user.first_name}!</b>
-
-Thank you for joining <b>{chat.title}</b>.
-
-<b> Community Rules</b>
-
-\u2705 Respect every member.
-\u2705 No spam or repeated messages.
-\u2705 No unauthorized links or advertisements.
-\u2705 No promoting other groups or channels.
-\u2705 No scams, phishing, or misleading content.
-\u2705 No offensive or abusive language.
-\u2705 Follow the instructions of admins and moderators.
-
-\u26A0\uFE0F <b> \U0001F6E1\uFE0F Anti-Spam Protection is Active</b>
-
-This community is protected by an automated moderation bot.
-
-Violations may result in:
-• \u26A0\uFE0F Warning
-• \U0001F507 Temporary Mute
-• \u26D4 Permanent Ban
-
-Thank you for helping keep this community safe!
-""",
-                parse_mode="HTML",
-                reply_markup=keyboard,
-                disable_web_page_preview=True
+                ]]
             )
+
+            try:
+                msg.reply_text(
+                    "<b>Welcome, {}</b>\n\n"
+                    "Thank you for joining <b>{}</b>.\n\n"
+                    "<b>Community Rules</b>\n\n"
+                    "1. Respect every member.\n"
+                    "2. No spam or repeated messages.\n"
+                    "3. No unauthorized links.\n"
+                    "4. No promoting other groups.\n"
+                    "5. No scams or phishing.\n"
+                    "6. No abusive language.\n"
+                    "7. Follow admin instructions.\n\n"
+                    "<b>Anti-Spam Protection is Active</b>\n\n"
+                    "Violations may result in:\n"
+                    "- Warning\n"
+                    "- Temporary Mute\n"
+                    "- Permanent Ban\n\n"
+                    "Thank you for helping keep this community safe.".format(
+                        user.first_name,
+                        chat.title
+                    ),
+                    parse_mode="HTML",
+                    reply_markup=keyboard,
+                    disable_web_page_preview=True
+                )
+            except Exception:
+                pass
+
+        return
+
+    # ==================================================
+    # BOT ADDED TO CHANNEL
+    # ==================================================
+    if update.my_chat_member:
+
+        member = update.my_chat_member
+
+        if (
+            member.new_chat_member.user.id == bot_id
+            and member.new_chat_member.status in ("member", "administrator")
+        ):
+            try:
+                context.bot.send_message(
+                    chat.id,
+                    "<b>Thank you for adding me!</b>\n\n"
+                    "Anti-Spam Protection has been activated.\n\n"
+                    "Use /help to configure moderation.",
+                    parse_mode="HTML"
+                )
+            except Exception:
+                pass
 
         return
 
