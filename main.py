@@ -1349,30 +1349,30 @@ def handle_join_events(update, context):
 
             # Bot added to group
             if user.id == bot_id:
-                try:
-                    msg.reply_text(
-                        """ <b>Thank you for adding me!</b>
+    try:
+        msg.reply_text(
+            """<b>Thank you for adding me!</b>
 
 Anti-Spam Protection has been activated successfully.
 
 I can automatically:
- Detect spam
- Block unauthorized links
- Block unwanted @mentions
- Warn offenders
- Mute repeat offenders
- Ban persistent spammers
+• Detect spam
+• Block unauthorized links
+• Block unwanted @mentions
+• Warn offenders
+• Mute repeat offenders
+• Ban persistent spammers
 
 Type /help to view all available commands and configure moderation.
 
-"Let's keep this community clean and secure!",
-                        parse_mode="HTML"
-                    )
-                except Exception:
-                    pass
+Let's keep this community clean and secure!
+""",
+            parse_mode="HTML"
+        )
+    except Exception:
+        pass
 
-                return
-
+    return
             # Ignore other bots
             if user.is_bot:
                 continue
