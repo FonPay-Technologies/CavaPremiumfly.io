@@ -1315,20 +1315,6 @@ def strict_group_moderation(update, context):
             context.bot.ban_chat_member(chat.id, user.id)
         except Exception:
             pass
-        
-# ======================================================
-# UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
-# ======================================================
-
-from telegram import ChatMemberUpdated
-
-welcomed = set()
-
-def handle_join_events(update, context):
-    """Handles ALL join events:
-       - group joins
-       - channel joins
-       - user added manually
 
 # ======================================================
 # UNIVERSAL JOIN HANDLER (GROUP + CHANNEL + BOT ADDED)
@@ -1349,7 +1335,7 @@ def handle_join_events(update, context):
     """
 
     upd = update.to_dict()
-    print("\n🔥 RAW JOIN EVENT:", upd, "\n")
+    print("\nJOIN EVENT:", upd, "\n")
 
     msg = update.message
     chat = update.effective_chat
@@ -1379,8 +1365,7 @@ I can automatically:
 
 Type /help to view all available commands and configure moderation.
 
-Let's keep this community clean and secure! 🚀
-""",
+"Let's keep this community clean and secure!",
                         parse_mode="HTML"
                     )
                 except Exception:
@@ -1409,7 +1394,7 @@ Let's keep this community clean and secure! 🚀
             ])
 
             msg.reply_text(
-                f"""🛡️ <b>Welcome, {user.first_name}!</b>
+                f"""<b>Welcome, {user.first_name}!</b>
 
 Thank you for joining <b>{chat.title}</b>.
 
@@ -1432,7 +1417,7 @@ Violations may result in:
 • \U0001F507 Temporary Mute
 • \u26D4 Permanent Ban
 
-Thank you for helping keep this community safe! 🎉
+Thank you for helping keep this community safe!
 """,
                 parse_mode="HTML",
                 reply_markup=keyboard,
