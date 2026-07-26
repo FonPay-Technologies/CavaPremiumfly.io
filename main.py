@@ -1438,8 +1438,6 @@ Thank you for helping keep this community safe! 🎉
             except: pass
             return
 
-        return
-
    # --------------------------------------------
 # FINAL STARTER (Required for Render)
 # --------------------------------------------
